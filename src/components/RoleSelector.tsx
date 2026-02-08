@@ -15,7 +15,7 @@ interface RoleOption {
 const roles: RoleOption[] = [
   {
     id: 'guardian',
-    title: 'Design System Guardian',
+    title: 'Design System',
     description: 'Monitor designer uncertainty, detect patterns, and guide system evolution',
     icon: Shield,
     focus: 'System governance',

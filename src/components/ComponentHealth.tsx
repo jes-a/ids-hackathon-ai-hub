@@ -244,7 +244,7 @@ export function ComponentHealth() {
                       }}
                     >
                       <p className="text-xs" style={{ color: 'var(--carbon-text-primary)' }}>
-                        <strong>Guardian insight:</strong> Multiple designers across teams are seeking clarity on this component.
+                        <strong>Insight:</strong> Multiple designers across teams are seeking clarity on this component.
                         Consider reviewing documentation, usage patterns, or creating specific guidance.
                       </p>
                     </div>

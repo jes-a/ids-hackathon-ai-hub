@@ -973,10 +973,24 @@ button {
 }
 
 .guardian-actions {
-  padding: 1rem;
-  border: 1px solid;
-  margin-top: 24px;
+  padding: 0 0 1rem;
+  margin-top: 0;
   margin-bottom: 1.5rem;
+}
+
+.guardian-actions-animate {
+  animation: guardian-actions-reveal 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes guardian-actions-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .guardian-action {
@@ -993,9 +1007,97 @@ button {
   gap: 0.75rem;
 }
 
+.guardian-question-wrap {
+  position: relative;
+}
+
+.guardian-question-wrap--resolved .guardian-question {
+  /* One line of text: padding-top + line-height + bottom padding */
+  box-sizing: border-box;
+  min-height: calc(1rem + 1.25rem + 36px); /* top pad + one line + bottom pad */
+  height: calc(1rem + 1.25rem + 36px);
+  max-height: calc(1rem + 1.25rem + 36px);
+  overflow: hidden;
+  transition: max-height 0.25s ease-out;
+  padding-top: 1rem;
+  padding-bottom: 36px;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  text-align: center !important;
+}
+
+.guardian-question-wrap--resolved .guardian-question-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: 0;
+  padding-right: 4.5rem; /* avoid overlap with Resolved badge */
+  display: block;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.guardian-question-wrap--resolved .guardian-question-meta {
+  display: none;
+}
+
+.guardian-question-wrap--resolved:hover .guardian-question {
+  height: auto;
+  max-height: 20rem;
+  overflow: visible;
+  padding-bottom: 1rem;
+  text-align: left !important;
+}
+
+.guardian-question-wrap--resolved:hover .guardian-question-text {
+  white-space: normal;
+  margin-bottom: 0.75rem;
+  padding-right: 0;
+  text-align: left;
+}
+
+.guardian-question-wrap--resolved:hover .guardian-question-meta {
+  display: flex;
+}
+
+/* Resolved card stays expanded when clicked until mouse leaves */
+.guardian-question-wrap--resolved-expanded .guardian-question {
+  height: auto;
+  max-height: 20rem;
+  overflow: visible;
+  padding-bottom: 1rem;
+  text-align: left !important;
+}
+
+.guardian-question-wrap--resolved-expanded .guardian-question-text {
+  white-space: normal;
+  margin-bottom: 0.75rem;
+  padding-right: 0;
+  text-align: left;
+}
+
+.guardian-question-wrap--resolved-expanded .guardian-question-meta {
+  display: flex;
+}
+
+.guardian-question-badge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  border: 1px solid var(--carbon-border-subtle);
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  background-color: var(--carbon-bg-secondary);
+  color: var(--carbon-text-secondary);
+  border-radius: var(--carbon-radius);
+}
+
 .guardian-question {
   border: 1px solid;
-  padding: 1rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 
 .guardian-empty {

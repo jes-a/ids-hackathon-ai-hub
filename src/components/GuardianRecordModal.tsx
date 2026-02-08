@@ -58,7 +58,7 @@ function SuccessToast({
   onDismiss: () => void;
 }) {
   useEffect(() => {
-    const t = setTimeout(onDismiss, 4500);
+    const t = setTimeout(onDismiss, 3000);
     return () => clearTimeout(t);
   }, [onDismiss]);
 
@@ -148,8 +148,9 @@ export function GuardianRecordModal({ open, onClose, onStartRecording }: Guardia
     toast.type === 'sent' ? 'Answer sent!' : toast.type === 'documentation' ? 'Added to documentation!' : '';
 
   const modalContentStyle: React.CSSProperties = {
-    maxWidth: step === 'ready' || step === 'recording' ? '20rem' : '32rem',
-    width: '100%',
+    width: '20rem',
+    minWidth: '20rem',
+    minHeight: '14rem',
     maxHeight: '90vh',
     overflow: 'auto',
     backgroundColor: 'var(--carbon-layer-01)',
@@ -157,6 +158,8 @@ export function GuardianRecordModal({ open, onClose, onStartRecording }: Guardia
     borderRadius: 'var(--carbon-radius)',
     boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
     padding: '1.5rem',
+    display: 'flex',
+    flexDirection: 'column',
   };
 
   return (
@@ -185,16 +188,18 @@ export function GuardianRecordModal({ open, onClose, onStartRecording }: Guardia
       >
         {step === 'ready' && (
           <>
-            <h2
-              id="guardian-record-modal-title"
-              className="text-lg mb-2"
-              style={{ color: 'var(--carbon-text-primary)' }}
-            >
-              Record an answer
-            </h2>
-            <p className="text-sm mb-4" style={{ color: 'var(--carbon-text-secondary)' }}>
-              Record your screen and voice to share with the requester. Click Start when you’re ready.
-            </p>
+            <div style={{ flex: 1, minHeight: '5rem' }}>
+              <h2
+                id="guardian-record-modal-title"
+                className="text-lg mb-2"
+                style={{ color: 'var(--carbon-text-primary)' }}
+              >
+                Record an answer
+              </h2>
+              <p className="text-sm mb-4" style={{ color: 'var(--carbon-text-secondary)' }}>
+                Record your screen and voice to share with the requester. Click Start when you’re ready.
+              </p>
+            </div>
             <button
               type="button"
               onClick={handleStartRecording}
@@ -208,6 +213,8 @@ export function GuardianRecordModal({ open, onClose, onStartRecording }: Guardia
                 fontSize: '0.875rem',
                 fontWeight: 500,
                 cursor: 'pointer',
+                flexShrink: 0,
+                marginTop: 'auto',
               }}
             >
               Start recording
@@ -217,39 +224,41 @@ export function GuardianRecordModal({ open, onClose, onStartRecording }: Guardia
 
         {step === 'recording' && (
           <>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                marginBottom: '1rem',
-              }}
-            >
-              <span
+            <div style={{ flex: 1, minHeight: '5rem' }}>
+              <div
                 style={{
-                  width: '12px',
-                  height: '12px',
-                  borderRadius: '50%',
-                  backgroundColor: '#da1e28',
-                  animation: 'guardian-recording-pulse 1.2s ease-in-out infinite',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  marginBottom: '1rem',
                 }}
-              />
-              <span
-                className="text-sm"
-                style={{ color: 'var(--carbon-text-primary)', fontWeight: 500 }}
               >
-                Recording
-              </span>
-              <span
-                className="text-sm"
-                style={{ color: 'var(--carbon-text-secondary)', fontVariantNumeric: 'tabular-nums' }}
-              >
-                {formatTime(recordingSeconds)}
-              </span>
+                <span
+                  style={{
+                    width: '12px',
+                    height: '12px',
+                    borderRadius: '50%',
+                    backgroundColor: '#da1e28',
+                    animation: 'guardian-recording-pulse 1.2s ease-in-out infinite',
+                  }}
+                />
+                <span
+                  className="text-sm"
+                  style={{ color: 'var(--carbon-text-primary)', fontWeight: 500 }}
+                >
+                  Recording
+                </span>
+                <span
+                  className="text-sm"
+                  style={{ color: 'var(--carbon-text-secondary)', fontVariantNumeric: 'tabular-nums' }}
+                >
+                  {formatTime(recordingSeconds)}
+                </span>
+              </div>
+              <p className="text-sm mb-4" style={{ color: 'var(--carbon-text-secondary)' }}>
+                Screen and voice are being recorded. Click Stop when finished.
+              </p>
             </div>
-            <p className="text-sm mb-4" style={{ color: 'var(--carbon-text-secondary)' }}>
-              Screen and voice are being recorded. Click Stop when finished.
-            </p>
             <button
               type="button"
               onClick={handleStopRecording}
@@ -263,6 +272,8 @@ export function GuardianRecordModal({ open, onClose, onStartRecording }: Guardia
                 fontSize: '0.875rem',
                 fontWeight: 500,
                 cursor: 'pointer',
+                flexShrink: 0,
+                marginTop: 'auto',
               }}
             >
               Stop recording
@@ -272,21 +283,25 @@ export function GuardianRecordModal({ open, onClose, onStartRecording }: Guardia
 
         {step === 'review' && (
           <>
-            <h2
-              id="guardian-record-modal-title"
-              className="text-lg mb-2"
-              style={{ color: 'var(--carbon-text-primary)' }}
-            >
-              Recording complete
-            </h2>
-            <p className="text-sm mb-4" style={{ color: 'var(--carbon-text-secondary)' }}>
-              Send your answer to the requester or add it to the documentation.
-            </p>
+            <div style={{ flex: 1, minHeight: '5rem' }}>
+              <h2
+                id="guardian-record-modal-title"
+                className="text-lg mb-2"
+                style={{ color: 'var(--carbon-text-primary)' }}
+              >
+                Recording complete
+              </h2>
+              <p className="text-sm mb-4" style={{ color: 'var(--carbon-text-secondary)' }}>
+                Send your answer to the requester or add it to the documentation.
+              </p>
+            </div>
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '0.75rem',
+                flexShrink: 0,
+                marginTop: 'auto',
               }}
             >
               <button

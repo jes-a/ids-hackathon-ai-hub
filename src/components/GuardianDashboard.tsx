@@ -18,11 +18,31 @@ export function GuardianDashboard() {
   const [selectedCluster, setSelectedCluster] = useState<QuestionCluster | null>(null);
   const [selectedQuestion, setSelectedQuestion] = useState<DesignerQuestion | null>(null);
   const [showRecordModal, setShowRecordModal] = useState(false);
+  const [resolvedQuestionIds, setResolvedQuestionIds] = useState<Set<string>>(new Set());
+  const [expandedResolvedId, setExpandedResolvedId] = useState<string | null>(null);
   const clusters = useMemo(() => clusterQuestions(mockQuestions), []);
 
   const handleSelectCluster = (cluster: QuestionCluster) => {
     setSelectedCluster(cluster);
     setSelectedQuestion(null);
+    setExpandedResolvedId(null);
+  };
+
+  const handleQuestionClick = (question: DesignerQuestion) => {
+    const isResolved = resolvedQuestionIds.has(question.id);
+    const isCurrentlySelected = selectedQuestion?.id === question.id;
+    setSelectedQuestion(isCurrentlySelected ? null : question);
+    if (isResolved) {
+      setExpandedResolvedId(isCurrentlySelected ? null : question.id);
+    } else {
+      setExpandedResolvedId(null);
+    }
+  };
+
+  const handleAddDocumentation = (questionId: string) => {
+    setResolvedQuestionIds((prev) => new Set(prev).add(questionId));
+    setSelectedQuestion(null);
+    setExpandedResolvedId(null);
   };
 
   const stats = {
@@ -83,7 +103,7 @@ export function GuardianDashboard() {
         }}
       >
         <h1 className="text-2xl mb-2" style={{ color: 'var(--carbon-text-primary)' }}>
-          Design System Guardian Hub
+          Design System Hub
         </h1>
         <p className="text-sm" style={{ color: 'var(--carbon-text-secondary)' }}>
           Monitor designer uncertainty and guide design system evolution
@@ -280,128 +300,135 @@ export function GuardianDashboard() {
                   Designer questions ({selectedCluster.questions.length})
                 </h3>
                 <p className="text-xs mb-3" style={{ color: 'var(--carbon-text-secondary)' }}>
-                  Click a question to see guardian actions
+                  Click a question to see actions
                 </p>
                 <div className="guardian-questions">
                   {selectedCluster.questions.map((question) => (
-                    <button
+                    <div
                       key={question.id}
-                      type="button"
-                      onClick={() => setSelectedQuestion(selectedQuestion?.id === question.id ? null : question)}
-                      className="guardian-question"
-                      style={{
-                        backgroundColor:
-                          selectedQuestion?.id === question.id
-                            ? 'var(--carbon-bg-hover)'
-                            : 'var(--carbon-layer-01)',
-                        borderColor:
-                          selectedQuestion?.id === question.id
-                            ? 'var(--carbon-interactive)'
-                            : 'var(--carbon-border-subtle)',
-                        borderRadius: 'var(--carbon-radius)',
-                        cursor: 'pointer',
-                        textAlign: 'left',
-                        width: '100%',
-                      }}
+                      onMouseLeave={() => setExpandedResolvedId(null)}
+                      style={{ width: '100%' }}
                     >
-                      <p className="text-sm mb-3" style={{ color: 'var(--carbon-text-primary)' }}>
-                        &quot;{question.question}&quot;
-                      </p>
-                      <div className="guardian-question-meta" style={{ color: 'var(--carbon-text-secondary)' }}>
-                        <span>{question.designer}</span>
-                        <span>•</span>
-                        <span>{question.team} team</span>
-                        <span>•</span>
-                        <span>{question.platform}</span>
-                        <span>•</span>
-                        <span>{formatDate(question.timestamp)}</span>
+                      <div
+                        className={`guardian-question-wrap${resolvedQuestionIds.has(question.id) ? ' guardian-question-wrap--resolved' : ''}${resolvedQuestionIds.has(question.id) && expandedResolvedId === question.id ? ' guardian-question-wrap--resolved-expanded' : ''}`}
+                      >
+                        {resolvedQuestionIds.has(question.id) && (
+                          <span className="guardian-question-badge">Resolved</span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleQuestionClick(question)}
+                          className="guardian-question"
+                          style={{
+                            backgroundColor:
+                              selectedQuestion?.id === question.id
+                                ? 'var(--carbon-bg-hover)'
+                                : 'var(--carbon-layer-01)',
+                            borderColor:
+                              selectedQuestion?.id === question.id
+                                ? 'var(--carbon-interactive)'
+                                : 'var(--carbon-border-subtle)',
+                            borderRadius: 'var(--carbon-radius)',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                            width: '100%',
+                          }}
+                        >
+                          <p
+                            className="guardian-question-text text-sm mb-3"
+                            style={{ color: 'var(--carbon-text-primary)' }}
+                          >
+                            &quot;{question.question}&quot;
+                          </p>
+                          <div className="guardian-question-meta" style={{ color: 'var(--carbon-text-secondary)' }}>
+                            <span>{question.designer}</span>
+                            <span>•</span>
+                            <span>{question.team} team</span>
+                            <span>•</span>
+                            <span>{question.platform}</span>
+                            <span>•</span>
+                            <span>{formatDate(question.timestamp)}</span>
+                          </div>
+                        </button>
                       </div>
-                    </button>
+                      {selectedQuestion?.id === question.id && (
+                        <div className="guardian-actions guardian-actions-animate">
+                          <h3 className="text-sm mb-3" style={{ color: 'var(--carbon-text-primary)' }}>
+                            Actions for this question
+                          </h3>
+                          <div className="guardian-actions-grid">
+                            <button
+                              onClick={() => selectedQuestion && handleAddDocumentation(selectedQuestion.id)}
+                              className="guardian-action"
+                              style={{
+                                backgroundColor: 'transparent',
+                                borderColor: 'var(--carbon-border-subtle)',
+                                color: 'var(--carbon-text-primary)',
+                                borderRadius: 'var(--carbon-radius)',
+                              }}
+                            >
+                              <CheckCircle width={16} height={16} />
+                              <span className="text-sm">Add documentation</span>
+                            </button>
+                            <button
+                              onClick={() => alert('Usage rule creation workflow would open here')}
+                              className="guardian-action"
+                              style={{
+                                backgroundColor: 'transparent',
+                                borderColor: 'var(--carbon-border-subtle)',
+                                color: 'var(--carbon-text-primary)',
+                                borderRadius: 'var(--carbon-radius)',
+                              }}
+                            >
+                              <AlertCircle width={16} height={16} />
+                              <span className="text-sm">Define usage rule</span>
+                            </button>
+                            <button
+                              onClick={() => alert('Discussion thread would be created for the design system team')}
+                              className="guardian-action"
+                              style={{
+                                backgroundColor: 'transparent',
+                                borderColor: 'var(--carbon-border-subtle)',
+                                color: 'var(--carbon-text-primary)',
+                                borderRadius: 'var(--carbon-radius)',
+                              }}
+                            >
+                              <MessageCircle width={16} height={16} />
+                              <span className="text-sm">Flag for discussion</span>
+                            </button>
+                            <button
+                              onClick={() => alert('This topic would be acknowledged and tracked for future consideration')}
+                              className="guardian-action"
+                              style={{
+                                backgroundColor: 'transparent',
+                                borderColor: 'var(--carbon-border-subtle)',
+                                color: 'var(--carbon-text-primary)',
+                                borderRadius: 'var(--carbon-radius)',
+                              }}
+                            >
+                              <Calendar width={16} height={16} />
+                              <span className="text-sm">Acknowledge gap</span>
+                            </button>
+                            <button
+                              onClick={() => setShowRecordModal(true)}
+                              className="guardian-action"
+                              style={{
+                                backgroundColor: 'transparent',
+                                borderColor: 'var(--carbon-border-subtle)',
+                                color: 'var(--carbon-text-primary)',
+                                borderRadius: 'var(--carbon-radius)',
+                              }}
+                            >
+                              <Video width={16} height={16} />
+                              <span className="text-sm">Add video</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>
-
-              {selectedQuestion && (
-              <div
-                className="guardian-actions"
-                style={{
-                  backgroundColor: 'var(--carbon-layer-01)',
-                  borderColor: 'var(--carbon-border-subtle)',
-                  borderRadius: 'var(--carbon-radius)',
-                }}
-              >
-                <h3 className="text-sm mb-3" style={{ color: 'var(--carbon-text-primary)' }}>
-                  Guardian actions for this question
-                </h3>
-                <div className="guardian-actions-grid">
-                  <button
-                    onClick={() => alert('Document clarification workflow would open here')}
-                    className="guardian-action"
-                    style={{
-                      backgroundColor: 'transparent',
-                      borderColor: 'var(--carbon-border-subtle)',
-                      color: 'var(--carbon-text-primary)',
-                      borderRadius: 'var(--carbon-radius)',
-                    }}
-                  >
-                    <CheckCircle width={16} height={16} />
-                    <span className="text-sm">Add documentation</span>
-                  </button>
-                  <button
-                    onClick={() => alert('Usage rule creation workflow would open here')}
-                    className="guardian-action"
-                    style={{
-                      backgroundColor: 'transparent',
-                      borderColor: 'var(--carbon-border-subtle)',
-                      color: 'var(--carbon-text-primary)',
-                      borderRadius: 'var(--carbon-radius)',
-                    }}
-                  >
-                    <AlertCircle width={16} height={16} />
-                    <span className="text-sm">Define usage rule</span>
-                  </button>
-                  <button
-                    onClick={() => alert('Discussion thread would be created for the design system team')}
-                    className="guardian-action"
-                    style={{
-                      backgroundColor: 'transparent',
-                      borderColor: 'var(--carbon-border-subtle)',
-                      color: 'var(--carbon-text-primary)',
-                      borderRadius: 'var(--carbon-radius)',
-                    }}
-                  >
-                    <MessageCircle width={16} height={16} />
-                    <span className="text-sm">Flag for discussion</span>
-                  </button>
-                  <button
-                    onClick={() => alert('This topic would be acknowledged and tracked for future consideration')}
-                    className="guardian-action"
-                    style={{
-                      backgroundColor: 'transparent',
-                      borderColor: 'var(--carbon-border-subtle)',
-                      color: 'var(--carbon-text-primary)',
-                      borderRadius: 'var(--carbon-radius)',
-                    }}
-                  >
-                    <Calendar width={16} height={16} />
-                    <span className="text-sm">Acknowledge gap</span>
-                  </button>
-                  <button
-                    onClick={() => setShowRecordModal(true)}
-                    className="guardian-action"
-                    style={{
-                      backgroundColor: 'transparent',
-                      borderColor: 'var(--carbon-border-subtle)',
-                      color: 'var(--carbon-text-primary)',
-                      borderRadius: 'var(--carbon-radius)',
-                    }}
-                  >
-                    <Video width={16} height={16} />
-                    <span className="text-sm">Add video</span>
-                  </button>
-                </div>
-              </div>
-              )}
             </div>
           ) : (
             <div className="guardian-empty">

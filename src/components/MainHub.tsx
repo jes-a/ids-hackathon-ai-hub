@@ -68,7 +68,7 @@ export function MainHub() {
   const getRoleLabel = () => {
     switch (userRole) {
       case 'guardian':
-        return 'Guardian';
+        return 'Design System';
       case 'developer':
         return 'Developer';
       case 'designer':

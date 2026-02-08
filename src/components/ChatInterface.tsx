@@ -117,7 +117,7 @@ export function ChatInterface() {
 
   const handleUnhelpful = () => {
     alert(
-      'Escalation options:\n\n• Contact Design System Guardian\n• Book Office Hours\n• Submit Feedback\n\nThese features would connect you with the Carbon team.'
+      'Escalation options:\n\n• Contact Design System\n• Book Office Hours\n• Submit Feedback\n\nThese features would connect you with the Carbon team.'
     );
   };
 

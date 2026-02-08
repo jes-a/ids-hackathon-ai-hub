@@ -307,7 +307,7 @@ export function TrendInsights() {
                       }}
                     >
                       <p className="text-xs mb-1" style={{ color: 'var(--carbon-text-placeholder)' }}>
-                        Guardian recommendation
+                        Recommendation
                       </p>
                       <p className="text-sm" style={{ color: 'var(--carbon-text-primary)' }}>
                         {insight.recommendation}
