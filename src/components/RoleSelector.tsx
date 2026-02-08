@@ -9,7 +9,7 @@ interface RoleOption {
   id: UserRole;
   title: string;
   description: string;
-  icon: React.ComponentType<{ size?: number; fill?: string; className?: string }>;
+  icon: React.ComponentType<{ size?: number | string; fill?: string; className?: string }>;
   focus: string;
 }
 
