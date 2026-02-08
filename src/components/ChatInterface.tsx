@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Send, Sparkles, ThumbsUp, ThumbsDown, Calendar, Github, Figma, FileCode } from '@/components/icons';
 import { useRole } from '@/contexts/RoleContext';
 import { generateAIResponse } from '@/utils/aiResponses';
@@ -409,7 +411,15 @@ export function ChatInterface() {
                       You are asking:
                     </div>
                   )}
-                  <div className="whitespace-pre-wrap">{message.content}</div>
+                  {message.role === 'assistant' ? (
+                    <div className="chat-markdown">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {message.content}
+                      </ReactMarkdown>
+                    </div>
+                  ) : (
+                    <div className="whitespace-pre-wrap">{message.content}</div>
+                  )}
                 </div>
 
                 {message.role === 'assistant' && message.componentPreview && renderComponentPreview(message.componentPreview)}
