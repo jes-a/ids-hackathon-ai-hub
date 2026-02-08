@@ -6,8 +6,8 @@ AI-powered documentation assistant for IBM's Carbon Design System.
 
 1. Clone the repo:
    ```bash
-   git clone https://github.com/[your-org]/carbon-ai-hub.git
-   cd carbon-ai-hub
+   git clone https://github.com/jes-a/ids-hackathon-ai-hub.git
+   cd ids-hackathon-ai-hub
    ```
 
 2. Install dependencies:
@@ -25,12 +25,11 @@ AI-powered documentation assistant for IBM's Carbon Design System.
 ## Project Structure
 
 - `src/app/page.tsx` — Home page (role selector)
-- `src/app/chat/page.tsx` — Chat interface
-- `src/components/` — All UI components (this is where you'll make most edits)
-- `src/lib/mock-responses.ts` — Mock AI responses (edit to add more)
-- `src/lib/roles.ts` — Role definitions
-- `src/lib/knowledge-sources.ts` — Official Carbon documentation sources and URLs
-- `src/lib/system-prompt.ts` — System prompt for future API use
+- `src/app/hub/page.tsx` — Main app hub (chat, audit, guardian views)
+- `src/app/chat/page.tsx` — Redirects to `/hub`
+- `src/components/` — UI components (hub, chat, audit, guardian dashboards)
+- `src/contexts/` — Role + theme context providers
+- `src/utils/` — Mock data and AI responses
 
 ## For Designers on the Team
 
@@ -42,20 +41,20 @@ Most of your edits will be in:
 ### Common edits
 
 - **Change text:** Find the string in the component file and edit it
-- **Change colors:** Use Carbon color tokens like `$blue-60`, `$gray-90`
-- **Change spacing:** Use Carbon spacing tokens like `$spacing-05`
-- **Add a component:** Check https://react.carbondesignsystem.com for Carbon React components
+- **Change colors:** Update CSS variables in `src/app/globals.scss`
+- **Change spacing:** Update padding/margins in `src/app/globals.scss` or component styles
+- **Add a component:** Create a new component in `src/components/` and wire it into `MainHub.tsx`
 
 ## Switching to Real AI (Future)
 
 1. Get an Anthropic API key from https://console.anthropic.com
 2. Create `.env.local` and add: `ANTHROPIC_API_KEY=your-key-here`
 3. Create `src/app/api/chat/route.ts` with the API integration
-4. Update `ChatShell.tsx` to call `/api/chat` instead of mock responses
+4. Update `src/components/ChatInterface.tsx` to call `/api/chat` instead of mock responses
 
 ## Tech Stack
 
-- Next.js 14 (App Router)
-- Carbon React (`@carbon/react`, `@carbon/icons-react`, `@carbon/styles`)
-- Sass for styling
+- Next.js (App Router)
+- Custom SVG icon set in `src/components/icons.tsx`
+- Sass for styling (CSS variables in `src/app/globals.scss`)
 - Mock AI responses (no API keys required)
