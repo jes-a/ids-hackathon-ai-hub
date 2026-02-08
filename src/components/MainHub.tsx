@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import {
   MessageSquare,
   Upload,
@@ -15,8 +15,9 @@ import {
   Figma,
   FileCode,
   LogOut,
+  ChevronDown,
 } from '@/components/icons';
-import { useRole } from '@/contexts/RoleContext';
+import { useRole, type UserRole } from '@/contexts/RoleContext';
 import { useRouter } from 'next/navigation';
 import { ChatInterface } from '@/components/ChatInterface';
 import { UIAuditUpload } from '@/components/UIAuditUpload';
@@ -34,6 +35,26 @@ export function MainHub() {
   const [guardianView, setGuardianView] = useState<GuardianView>('dashboard');
   const [showTeamModal, setShowTeamModal] = useState(false);
   const [teamImageError, setTeamImageError] = useState(false);
+  const [showRoleDropdown, setShowRoleDropdown] = useState(false);
+  const roleDropdownRef = useRef<HTMLDivElement>(null);
+
+  const roleOptions: { id: UserRole; title: string; Icon: React.ComponentType<React.SVGProps<SVGSVGElement>> }[] = [
+    { id: 'guardian', title: 'Design System', Icon: Shield },
+    { id: 'developer', title: 'Developer', Icon: Code2 },
+    { id: 'designer', title: 'Designer', Icon: Palette },
+  ];
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (roleDropdownRef.current && !roleDropdownRef.current.contains(e.target as Node)) {
+        setShowRoleDropdown(false);
+      }
+    };
+    if (showRoleDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showRoleDropdown]);
 
   useEffect(() => {
     if (!userRole) {
@@ -301,7 +322,92 @@ export function MainHub() {
           </nav>
         )}
 
-        <div className="hub-sidebar-footer" style={{ borderColor: 'var(--carbon-border-subtle)' }}>
+        <div
+          className="hub-sidebar-footer"
+          style={{
+            borderColor: 'var(--carbon-border-subtle)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.5rem',
+          }}
+        >
+          <div ref={roleDropdownRef} style={{ position: 'relative', width: '100%' }}>
+            <button
+              type="button"
+              onClick={() => setShowRoleDropdown((open) => !open)}
+              className="hub-nav-button"
+              style={{
+                backgroundColor: 'transparent',
+                borderColor: 'var(--carbon-border-subtle)',
+                color: 'var(--carbon-text-primary)',
+                borderRadius: 'var(--carbon-radius)',
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+              }}
+            >
+              {renderRoleIcon()}
+              <span style={{ flex: 1, textAlign: 'left' }}>{getRoleLabel()}</span>
+              <ChevronDown
+                width={16}
+                height={16}
+                style={{
+                  color: 'var(--carbon-text-secondary)',
+                  transform: showRoleDropdown ? 'rotate(180deg)' : 'none',
+                  transition: 'transform 0.2s',
+                }}
+              />
+            </button>
+            {showRoleDropdown && (
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: '100%',
+                  left: 0,
+                  right: 0,
+                  marginBottom: '0.25rem',
+                  backgroundColor: 'var(--carbon-layer-01)',
+                  border: '1px solid var(--carbon-border-subtle)',
+                  borderRadius: 'var(--carbon-radius)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                  overflow: 'hidden',
+                  zIndex: 100,
+                }}
+              >
+                {roleOptions.map((role) => {
+                  const Icon = role.Icon;
+                  const isActive = userRole === role.id;
+                  return (
+                    <button
+                      key={role.id}
+                      type="button"
+                      onClick={() => {
+                        setUserRole(role.id);
+                        setShowRoleDropdown(false);
+                      }}
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        padding: '0.5rem 0.75rem',
+                        backgroundColor: isActive ? 'var(--carbon-bg-hover)' : 'transparent',
+                        border: 'none',
+                        color: 'var(--carbon-text-primary)',
+                        fontSize: '0.875rem',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                      }}
+                    >
+                      <Icon width={16} height={16} style={{ color: 'var(--carbon-interactive)' }} />
+                      <span>{role.title}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
           <button
             type="button"
             onClick={handleChangeRoles}
