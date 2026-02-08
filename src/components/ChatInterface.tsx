@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, ThumbsDown, Calendar, Github, Figma, FileCode } from '@/components/icons';
+import { Send, Sparkles, ThumbsUp, ThumbsDown, Calendar, Github, Figma, FileCode } from '@/components/icons';
 import { useRole } from '@/contexts/RoleContext';
 import { generateAIResponse } from '@/utils/aiResponses';
 
@@ -28,26 +28,52 @@ export function ChatInterface() {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [suggestionIndex, setSuggestionIndex] = useState(0);
+  const [feedbackGivenForMessageIds, setFeedbackGivenForMessageIds] = useState<Set<string>>(new Set());
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const lastQuestionRef = useRef<HTMLDivElement>(null);
+
+  const handleFeedback = (messageId: string) => {
+    setFeedbackGivenForMessageIds((prev) => new Set(prev).add(messageId));
+  };
+
+  const hasMessages = chatHistory.length > 0;
 
   useEffect(() => {
     inputRef.current?.focus();
     inputRef.current?.setSelectionRange(0, 0);
   }, []);
 
+  /* Stop placeholder cycling when user has already asked (chat mode) */
   useEffect(() => {
+    if (hasMessages) return;
     const interval = setInterval(() => {
       setSuggestionIndex((i) => (i + 1) % placeholderSuggestions.length);
     }, 2500);
     return () => clearInterval(interval);
-  }, []);
+  }, [hasMessages]);
 
+  /* Keep input focused after AI reply and when entering chat mode */
   useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    if (!hasMessages) return;
+    if (isTyping) return;
+    const t = setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
+    return () => clearTimeout(t);
+  }, [hasMessages, isTyping]);
+
+  /* When answer is shown, scroll so the question is at the top; user scrolls down to read long answers */
+  useEffect(() => {
+    if (!hasMessages || isTyping) return;
+    const last = chatHistory[chatHistory.length - 1];
+    if (last?.role === 'assistant') {
+      const t = setTimeout(() => {
+        lastQuestionRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      }, 100);
+      return () => clearTimeout(t);
     }
-  }, [chatHistory, isTyping]);
+  }, [chatHistory, isTyping, hasMessages]);
 
   const handleSend = () => {
     if (!input.trim() || !userRole) return;
@@ -192,8 +218,75 @@ export function ChatInterface() {
     return null;
   };
 
+  const chatInputBlock = (
+    <div className="chat-input-wrap">
+      <div className="chat-input-inner">
+        <div className="chat-input-row">
+          <div className="chat-input-prefix-wrap">
+            {!input && (
+              <div className="chat-input-placeholder-overlay" aria-hidden>
+                <span className="chat-input-placeholder-prefix">{PLACEHOLDER_PREFIX}</span>
+                <span
+                  key={suggestionIndex}
+                  className="chat-input-placeholder-suggestion"
+                  style={{ color: 'var(--carbon-text-placeholder)' }}
+                >
+                  {placeholderSuggestions[suggestionIndex]}
+                </span>
+              </div>
+            )}
+            <input
+              ref={inputRef}
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+              placeholder=""
+              className="chat-input chat-input-with-prefix"
+              style={{
+                backgroundColor: 'var(--carbon-field)',
+                color: 'var(--carbon-text-primary)',
+                borderColor: 'var(--carbon-border-subtle)',
+                borderRadius: 'var(--carbon-radius)',
+                fontFamily: 'var(--carbon-font-family)',
+                fontSize: '16px',
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = 'var(--carbon-interactive)';
+                e.currentTarget.style.boxShadow = '0 0 0 2px var(--carbon-interactive-transparent)';
+                e.currentTarget.setSelectionRange(0, 0);
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = 'var(--carbon-border-subtle)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            />
+          </div>
+          {input.trim() && (
+            <button
+              type="button"
+              onClick={handleSend}
+              className="chat-send"
+              style={{
+                backgroundColor: 'var(--carbon-interactive)',
+                borderColor: 'var(--carbon-interactive)',
+                color: 'var(--carbon-text-on-color)',
+                borderRadius: 'var(--carbon-radius)',
+                fontSize: '16px',
+                fontWeight: '500',
+              }}
+            >
+              <Send width={20} height={20} />
+              <span>Send</span>
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="hub-view">
+    <div className={`hub-view${hasMessages ? ' hub-view--chat-mode' : ''}`}>
       <header
         className="hub-view-header"
         style={{
@@ -212,70 +305,7 @@ export function ChatInterface() {
         </p>
       </header>
 
-      <div className="chat-input-wrap">
-        <div className="chat-input-inner">
-          <div className="chat-input-row">
-            <div className="chat-input-prefix-wrap">
-              {!input && (
-                <div className="chat-input-placeholder-overlay" aria-hidden>
-                  <span className="chat-input-placeholder-prefix">{PLACEHOLDER_PREFIX}</span>
-                  <span
-                    key={suggestionIndex}
-                    className="chat-input-placeholder-suggestion"
-                    style={{ color: 'var(--carbon-text-placeholder)' }}
-                  >
-                    {placeholderSuggestions[suggestionIndex]}
-                  </span>
-                </div>
-              )}
-              <input
-                ref={inputRef}
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                placeholder=""
-                className="chat-input chat-input-with-prefix"
-                style={{
-                  backgroundColor: 'var(--carbon-field)',
-                  color: 'var(--carbon-text-primary)',
-                  borderColor: 'var(--carbon-border-subtle)',
-                  borderRadius: 'var(--carbon-radius)',
-                  fontFamily: 'var(--carbon-font-family)',
-                  fontSize: '16px',
-                }}
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--carbon-interactive)';
-                  e.currentTarget.style.boxShadow = '0 0 0 2px var(--carbon-interactive-transparent)';
-                  e.currentTarget.setSelectionRange(0, 0);
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--carbon-border-subtle)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              />
-            </div>
-            {input.trim() && (
-              <button
-                type="button"
-                onClick={handleSend}
-                className="chat-send"
-                style={{
-                  backgroundColor: 'var(--carbon-interactive)',
-                  borderColor: 'var(--carbon-interactive)',
-                  color: 'var(--carbon-text-on-color)',
-                  borderRadius: 'var(--carbon-radius)',
-                  fontSize: '16px',
-                  fontWeight: '500',
-                }}
-              >
-                <Send width={20} height={20} />
-                <span>Send</span>
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
+      {!hasMessages && chatInputBlock}
 
       <div
         ref={chatContainerRef}
@@ -309,18 +339,37 @@ export function ChatInterface() {
           </div>
         ) : (
           <div className="chat-thread">
-            {chatHistory.map((message) => (
-              <div key={message.id} className="chat-thread-item">
+            {(() => {
+              let lastUserIndex = -1;
+              for (let i = chatHistory.length - 1; i >= 0; i--) {
+                if (chatHistory[i].role === 'user') {
+                  lastUserIndex = i;
+                  break;
+                }
+              }
+              return chatHistory.map((message, index) => {
+                const isLastUserMessage = message.role === 'user' && index === lastUserIndex;
+                return (
+              <div
+                key={message.id}
+                className={`chat-thread-item ${message.role === 'user' ? 'chat-thread-item-user' : ''}`}
+                ref={isLastUserMessage ? lastQuestionRef : undefined}
+              >
                 <div
                   className={`chat-bubble ${message.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-assistant'}`}
                   style={{
                     backgroundColor:
-                      message.role === 'user' ? 'var(--carbon-interactive)' : 'var(--carbon-layer-01)',
+                      message.role === 'user' ? 'transparent' : 'var(--carbon-layer-01)',
                     borderColor:
-                      message.role === 'user' ? 'var(--carbon-interactive)' : 'var(--carbon-border-subtle)',
+                      message.role === 'user' ? 'transparent' : 'var(--carbon-border-subtle)',
+                    borderWidth: message.role === 'user' ? 0 : undefined,
                     color:
-                      message.role === 'user' ? 'var(--carbon-text-on-color)' : 'var(--carbon-text-primary)',
+                      message.role === 'user' ? 'var(--carbon-text-primary)' : 'var(--carbon-text-primary)',
                     borderRadius: 'var(--carbon-radius)',
+                    ...(message.role === 'user' && {
+                      fontWeight: 'bold',
+                      textAlign: 'left',
+                    }),
                   }}
                 >
                   {message.role === 'assistant' && message.trustBadge && (
@@ -345,6 +394,19 @@ export function ChatInterface() {
                       >
                         {message.trustBadge === 'official' ? '✓ Official Rule' : 'Best Practice'}
                       </span>
+                    </div>
+                  )}
+                  {message.role === 'user' && (
+                    <div
+                      className="chat-user-question-label"
+                      style={{
+                        fontSize: '1rem',
+                        fontWeight: 400,
+                        color: 'var(--carbon-text-secondary)',
+                        marginBottom: '0.25rem',
+                      }}
+                    >
+                      You are asking:
                     </div>
                   )}
                   <div className="whitespace-pre-wrap">{message.content}</div>
@@ -402,19 +464,6 @@ export function ChatInterface() {
                 {message.role === 'assistant' && (
                   <div className="chat-actions">
                     <button
-                      onClick={handleUnhelpful}
-                      className="chat-action-button"
-                      style={{
-                        backgroundColor: 'transparent',
-                        borderColor: 'var(--carbon-border-subtle)',
-                        color: 'var(--carbon-text-secondary)',
-                        borderRadius: 'var(--carbon-radius)',
-                      }}
-                    >
-                      <ThumbsDown width={16} height={16} />
-                      <span>Unhelpful?</span>
-                    </button>
-                    <button
                       onClick={() => alert('Office hours booking would open here')}
                       className="chat-action-button"
                       style={{
@@ -427,10 +476,45 @@ export function ChatInterface() {
                       <Calendar width={16} height={16} />
                       <span>Book office hours</span>
                     </button>
+                    {!feedbackGivenForMessageIds.has(message.id) && (
+                      <div className="chat-actions-row">
+                        <button
+                          onClick={() => handleFeedback(message.id)}
+                          className="chat-action-button chat-action-button-small"
+                          style={{
+                            backgroundColor: 'transparent',
+                            borderColor: 'var(--carbon-border-subtle)',
+                            color: 'var(--carbon-text-secondary)',
+                            borderRadius: 'var(--carbon-radius)',
+                          }}
+                        >
+                          <ThumbsUp width={14} height={14} />
+                          <span>Helpful</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            handleFeedback(message.id);
+                            handleUnhelpful();
+                          }}
+                          className="chat-action-button chat-action-button-small"
+                          style={{
+                            backgroundColor: 'transparent',
+                            borderColor: 'var(--carbon-border-subtle)',
+                            color: 'var(--carbon-text-secondary)',
+                            borderRadius: 'var(--carbon-radius)',
+                          }}
+                        >
+                          <ThumbsDown width={14} height={14} />
+                          <span>Unhelpful?</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
-            ))}
+                );
+              });
+            })()}
 
             {isTyping && (
               <div
@@ -460,6 +544,8 @@ export function ChatInterface() {
           </div>
         )}
       </div>
+
+      {hasMessages && chatInputBlock}
     </div>
   );
 }

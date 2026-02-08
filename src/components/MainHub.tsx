@@ -32,6 +32,8 @@ export function MainHub() {
   const router = useRouter();
   const [standardView, setStandardView] = useState<StandardView>('chat');
   const [guardianView, setGuardianView] = useState<GuardianView>('dashboard');
+  const [showTeamModal, setShowTeamModal] = useState(false);
+  const [teamImageError, setTeamImageError] = useState(false);
 
   useEffect(() => {
     if (!userRole) {
@@ -39,7 +41,25 @@ export function MainHub() {
     }
   }, [userRole, router]);
 
-  const handleLogout = () => {
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowTeamModal(false);
+    };
+    if (showTeamModal) {
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = '';
+    };
+  }, [showTeamModal]);
+
+  useEffect(() => {
+    if (showTeamModal) setTeamImageError(false);
+  }, [showTeamModal]);
+
+  const handleChangeRoles = () => {
     setUserRole(null);
     clearHistory();
     router.push('/');
@@ -87,7 +107,7 @@ export function MainHub() {
           <button
             type="button"
             className="hub-sidebar-title-row"
-            onClick={() => router.push('/')}
+            onClick={() => setShowTeamModal(true)}
             style={{
               background: 'none',
               border: 'none',
@@ -95,10 +115,13 @@ export function MainHub() {
               cursor: 'pointer',
               textAlign: 'left',
               width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
             }}
-            aria-label="Go to home"
+            aria-label="Show team"
           >
-            <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+            <svg width="24" height="24" viewBox="0 0 32 32" fill="none" aria-hidden>
               <rect width="32" height="32" fill="var(--carbon-interactive)" />
               <path d="M8 8h16v4H8V8zm0 6h16v4H8v-4zm0 6h10v4H8v-4z" fill="white" />
             </svg>
@@ -106,24 +129,6 @@ export function MainHub() {
               Carbon AI Hub
             </span>
           </button>
-          <div
-            className="hub-sidebar-role"
-            style={{
-              backgroundColor: 'var(--carbon-bg-primary)',
-              borderColor: 'var(--carbon-border-subtle)',
-              borderRadius: 'var(--carbon-radius)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.5rem 0.75rem',
-            }}
-            aria-label={`Signed in as ${getRoleLabel()}`}
-          >
-            {renderRoleIcon()}
-            <span className="hub-sidebar-role-label" style={{ color: 'var(--carbon-text-secondary)' }}>
-              {getRoleLabel()}
-            </span>
-          </div>
         </div>
 
         {isGuardian && (
@@ -298,7 +303,8 @@ export function MainHub() {
 
         <div className="hub-sidebar-footer" style={{ borderColor: 'var(--carbon-border-subtle)' }}>
           <button
-            onClick={handleLogout}
+            type="button"
+            onClick={handleChangeRoles}
             className="hub-nav-button"
             style={{
               backgroundColor: 'transparent',
@@ -342,6 +348,94 @@ export function MainHub() {
           </>
         )}
       </main>
+
+      {showTeamModal && (
+        <div
+          className="hub-team-modal-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="TEAM-X illustration"
+          onClick={() => setShowTeamModal(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(0,0,0,0.7)',
+            padding: '2rem',
+          }}
+        >
+          <div
+            className="hub-team-modal-content"
+            style={{
+              position: 'relative',
+              maxWidth: '100%',
+              maxHeight: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {teamImageError ? (
+              <div
+                style={{
+                  padding: '2rem',
+                  maxWidth: '24rem',
+                  backgroundColor: 'var(--carbon-layer-01)',
+                  border: '1px solid var(--carbon-border-subtle)',
+                  borderRadius: 'var(--carbon-radius)',
+                  color: 'var(--carbon-text-secondary)',
+                  fontSize: '0.875rem',
+                  textAlign: 'center',
+                }}
+              >
+                <p style={{ marginBottom: '0.5rem', color: 'var(--carbon-text-primary)' }}>
+                  Image not found
+                </p>
+                <p>
+                  Add your TEAM-X illustration as <strong>team-x.png</strong> in the{' '}
+                  <strong>public</strong> folder, then refresh.
+                </p>
+              </div>
+            ) : (
+              <img
+                src="/team-x.png"
+                alt="TEAM-X - Team illustration"
+                onError={() => setTeamImageError(true)}
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: '90vh',
+                  width: 'auto',
+                  height: 'auto',
+                  objectFit: 'contain',
+                  borderRadius: 'var(--carbon-radius)',
+                }}
+              />
+            )}
+            <button
+              type="button"
+              onClick={() => setShowTeamModal(false)}
+              aria-label="Close"
+              style={{
+                position: 'absolute',
+                top: '-2.5rem',
+                right: 0,
+                background: 'var(--carbon-layer-01)',
+                border: '1px solid var(--carbon-border-subtle)',
+                color: 'var(--carbon-text-primary)',
+                borderRadius: 'var(--carbon-radius)',
+                padding: '0.5rem 1rem',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
