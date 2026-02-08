@@ -1,6 +1,7 @@
 'use client';
 
-import { Code2, Palette, Shield } from '@/components/icons';
+import { Security, Code, ColorPalette } from '@carbon/icons-react';
+import { CarbonLogo, CortexLogo } from '@/components/Logo';
 import { useRole, type UserRole } from '@/contexts/RoleContext';
 import { useRouter } from 'next/navigation';
 
@@ -8,7 +9,7 @@ interface RoleOption {
   id: UserRole;
   title: string;
   description: string;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  icon: React.ComponentType<{ size?: number; fill?: string; className?: string }>;
   focus: string;
 }
 
@@ -17,21 +18,21 @@ const roles: RoleOption[] = [
     id: 'guardian',
     title: 'Design System Guardian',
     description: 'Monitor designer uncertainty, detect patterns, and guide system evolution',
-    icon: Shield,
+    icon: Security,
     focus: 'System governance',
   },
   {
     id: 'developer',
     title: 'Developer',
     description: 'Access code snippets, prop tables, and React implementation details',
-    icon: Code2,
+    icon: Code,
     focus: 'Technical implementation',
   },
   {
     id: 'designer',
     title: 'Designer',
     description: 'Explore spacing tokens, color values, and Figma-ready specs',
-    icon: Palette,
+    icon: ColorPalette,
     focus: 'Visual specifications',
   },
 ];
@@ -56,10 +57,7 @@ export function RoleSelector() {
       <div className="role-selector-inner">
         <div className="role-selector-header">
           <div className="role-selector-title-row">
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-              <rect width="32" height="32" fill="var(--carbon-interactive)" />
-              <path d="M8 8h16v4H8V8zm0 6h16v4H8v-4zm0 6h10v4H8v-4z" fill="white" />
-            </svg>
+            <CarbonLogo size={32} color="var(--carbon-interactive)" />
             <h1 className="role-selector-title" style={{ color: 'var(--carbon-text-primary)' }}>
               Carbon Design System
             </h1>
@@ -101,7 +99,7 @@ export function RoleSelector() {
                       borderRadius: 'var(--carbon-radius)',
                     }}
                   >
-                    <Icon width={24} height={24} style={{ color: 'var(--carbon-text-on-color)' }} />
+                    <Icon size={24} fill="var(--carbon-text-on-color)" />
                   </div>
                   <div>
                     <h3 className="role-card-title" style={{ color: 'var(--carbon-text-primary)' }}>
@@ -127,11 +125,18 @@ export function RoleSelector() {
           })}
         </div>
 
-        <div className="role-selector-footer">
-          <p className="role-selector-footer-text" style={{ color: 'var(--carbon-text-placeholder)' }}>
-            Powered by RAG architecture • Indexes carbondesignsystem.com, Figma APIs, and @carbon/react
-          </p>
+      </div>
+
+      <div className="role-selector-footer" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+          <span style={{ fontSize: 12, lineHeight: 1, color: 'var(--logo-powered-by-color, #6f6f6f)', fontFamily: 'var(--carbon-font-family, inherit)' }}>
+            Powered by
+          </span>
+          <CortexLogo height={18} />
         </div>
+        <p className="role-selector-footer-text" style={{ color: 'var(--carbon-text-placeholder)' }}>
+          Indexes carbondesignsystem.com, Figma APIs, and @carbon/react
+        </p>
       </div>
     </div>
   );

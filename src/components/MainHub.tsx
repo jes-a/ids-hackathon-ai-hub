@@ -5,10 +5,7 @@ import {
   MessageSquare,
   Upload,
   BookOpen,
-  Code2,
-  Palette,
   BarChart3,
-  Shield,
   Activity,
   TrendingUp,
   Sun,
@@ -17,6 +14,8 @@ import {
   Figma,
   FileCode,
 } from '@/components/icons';
+import { Security, Code, ColorPalette } from '@carbon/icons-react';
+import { CarbonLogo } from '@/components/Logo';
 import { useRole } from '@/contexts/RoleContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useRouter } from 'next/navigation';
@@ -70,17 +69,18 @@ export function MainHub() {
 
   const isGuardian = userRole === 'guardian';
 
-  const roleIconProps = { width: 16, height: 16, style: { color: 'var(--carbon-interactive)' } as React.CSSProperties };
+  const carbonIconProps = { size: 16, fill: 'var(--carbon-interactive)' };
+  const fallbackIconProps = { width: 16, height: 16, style: { color: 'var(--carbon-interactive)' } as React.CSSProperties };
   const renderRoleIcon = () => {
     switch (userRole) {
       case 'guardian':
-        return <Shield {...roleIconProps} />;
+        return <Security {...carbonIconProps} />;
       case 'developer':
-        return <Code2 {...roleIconProps} />;
+        return <Code {...carbonIconProps} />;
       case 'designer':
-        return <Palette {...roleIconProps} />;
+        return <ColorPalette {...carbonIconProps} />;
       default:
-        return <MessageSquare {...roleIconProps} />;
+        return <MessageSquare {...fallbackIconProps} />;
     }
   };
 
@@ -95,10 +95,7 @@ export function MainHub() {
       >
         <div className="hub-sidebar-header" style={{ borderColor: 'var(--carbon-border-subtle)' }}>
           <div className="hub-sidebar-title-row">
-            <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
-              <rect width="32" height="32" fill="var(--carbon-interactive)" />
-              <path d="M8 8h16v4H8V8zm0 6h16v4H8v-4zm0 6h10v4H8v-4z" fill="white" />
-            </svg>
+            <CarbonLogo size={24} color="var(--carbon-interactive)" />
             <span className="hub-sidebar-title" style={{ color: 'var(--carbon-text-primary)' }}>
               Carbon AI Hub
             </span>
