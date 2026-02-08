@@ -138,24 +138,6 @@ export function MainHub() {
               Carbon AI Hub
             </span>
           </button>
-          <div
-            className="hub-sidebar-role"
-            style={{
-              backgroundColor: 'var(--carbon-bg-primary)',
-              borderColor: 'var(--carbon-border-subtle)',
-              borderRadius: 'var(--carbon-radius)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.5rem 0.75rem',
-            }}
-            aria-label={`Signed in as ${getRoleLabel()}`}
-          >
-            {renderRoleIcon()}
-            <span className="hub-sidebar-role-label" style={{ color: 'var(--carbon-text-secondary)' }}>
-              {getRoleLabel()}
-            </span>
-          </div>
         </div>
 
         {isGuardian && (
