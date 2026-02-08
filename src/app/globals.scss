@@ -652,6 +652,16 @@ button {
   animation: chat-bounce 0.6s ease-in-out infinite;
 }
 
+@keyframes guardian-recording-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
 @keyframes chat-bounce {
   0%,
   100% {
@@ -679,7 +689,7 @@ button {
   .hub-view-scroll {
     flex: 1;
     min-height: 0;
-    padding-top: 1.5rem;
+    padding-top: 0.75rem;
     padding-bottom: 0;
   }
 
@@ -965,6 +975,7 @@ button {
 .guardian-actions {
   padding: 1rem;
   border: 1px solid;
+  margin-top: 24px;
   margin-bottom: 1.5rem;
 }
 

@@ -398,6 +398,11 @@ export function generateAIResponse(query: string, role: UserRole): AIResponse {
     response = generateDefaultResponse(query, role);
   }
 
+  /* For guardians: suggest optional video answer when response would benefit from visual explanation */
+  if (role === 'guardian' && response.role === 'assistant' && (response.componentPreview || response.sources?.length)) {
+    return { ...response, suggestVideoAnswer: true };
+  }
+
   return response;
 }
 

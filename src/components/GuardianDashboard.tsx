@@ -9,12 +9,21 @@ import {
   CheckCircle,
   MessageCircle,
   Calendar,
+  Video,
 } from '@/components/icons';
-import { mockQuestions, clusterQuestions, type QuestionCluster } from '@/utils/mockQuestions';
+import { mockQuestions, clusterQuestions, type QuestionCluster, type DesignerQuestion } from '@/utils/mockQuestions';
+import { GuardianRecordModal } from '@/components/GuardianRecordModal';
 
 export function GuardianDashboard() {
   const [selectedCluster, setSelectedCluster] = useState<QuestionCluster | null>(null);
+  const [selectedQuestion, setSelectedQuestion] = useState<DesignerQuestion | null>(null);
+  const [showRecordModal, setShowRecordModal] = useState(false);
   const clusters = useMemo(() => clusterQuestions(mockQuestions), []);
+
+  const handleSelectCluster = (cluster: QuestionCluster) => {
+    setSelectedCluster(cluster);
+    setSelectedQuestion(null);
+  };
 
   const stats = {
     totalQuestions: mockQuestions.length,
@@ -154,7 +163,7 @@ export function GuardianDashboard() {
                 return (
                   <button
                     key={cluster.id}
-                    onClick={() => setSelectedCluster(cluster)}
+                    onClick={() => handleSelectCluster(cluster)}
                     className="guardian-cluster"
                     style={{
                       backgroundColor:
@@ -266,6 +275,53 @@ export function GuardianDashboard() {
                 </div>
               </div>
 
+              <div>
+                <h3 className="text-sm mb-3" style={{ color: 'var(--carbon-text-primary)' }}>
+                  Designer questions ({selectedCluster.questions.length})
+                </h3>
+                <p className="text-xs mb-3" style={{ color: 'var(--carbon-text-secondary)' }}>
+                  Click a question to see guardian actions
+                </p>
+                <div className="guardian-questions">
+                  {selectedCluster.questions.map((question) => (
+                    <button
+                      key={question.id}
+                      type="button"
+                      onClick={() => setSelectedQuestion(selectedQuestion?.id === question.id ? null : question)}
+                      className="guardian-question"
+                      style={{
+                        backgroundColor:
+                          selectedQuestion?.id === question.id
+                            ? 'var(--carbon-bg-hover)'
+                            : 'var(--carbon-layer-01)',
+                        borderColor:
+                          selectedQuestion?.id === question.id
+                            ? 'var(--carbon-interactive)'
+                            : 'var(--carbon-border-subtle)',
+                        borderRadius: 'var(--carbon-radius)',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        width: '100%',
+                      }}
+                    >
+                      <p className="text-sm mb-3" style={{ color: 'var(--carbon-text-primary)' }}>
+                        &quot;{question.question}&quot;
+                      </p>
+                      <div className="guardian-question-meta" style={{ color: 'var(--carbon-text-secondary)' }}>
+                        <span>{question.designer}</span>
+                        <span>•</span>
+                        <span>{question.team} team</span>
+                        <span>•</span>
+                        <span>{question.platform}</span>
+                        <span>•</span>
+                        <span>{formatDate(question.timestamp)}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {selectedQuestion && (
               <div
                 className="guardian-actions"
                 style={{
@@ -275,7 +331,7 @@ export function GuardianDashboard() {
                 }}
               >
                 <h3 className="text-sm mb-3" style={{ color: 'var(--carbon-text-primary)' }}>
-                  Guardian actions
+                  Guardian actions for this question
                 </h3>
                 <div className="guardian-actions-grid">
                   <button
@@ -330,40 +386,22 @@ export function GuardianDashboard() {
                     <Calendar width={16} height={16} />
                     <span className="text-sm">Acknowledge gap</span>
                   </button>
+                  <button
+                    onClick={() => setShowRecordModal(true)}
+                    className="guardian-action"
+                    style={{
+                      backgroundColor: 'transparent',
+                      borderColor: 'var(--carbon-border-subtle)',
+                      color: 'var(--carbon-text-primary)',
+                      borderRadius: 'var(--carbon-radius)',
+                    }}
+                  >
+                    <Video width={16} height={16} />
+                    <span className="text-sm">Add video</span>
+                  </button>
                 </div>
               </div>
-
-              <div>
-                <h3 className="text-sm mb-3" style={{ color: 'var(--carbon-text-primary)' }}>
-                  Designer questions ({selectedCluster.questions.length})
-                </h3>
-                <div className="guardian-questions">
-                  {selectedCluster.questions.map((question) => (
-                    <div
-                      key={question.id}
-                      className="guardian-question"
-                      style={{
-                        backgroundColor: 'var(--carbon-layer-01)',
-                        borderColor: 'var(--carbon-border-subtle)',
-                        borderRadius: 'var(--carbon-radius)',
-                      }}
-                    >
-                      <p className="text-sm mb-3" style={{ color: 'var(--carbon-text-primary)' }}>
-                        &quot;{question.question}&quot;
-                      </p>
-                      <div className="guardian-question-meta" style={{ color: 'var(--carbon-text-secondary)' }}>
-                        <span>{question.designer}</span>
-                        <span>•</span>
-                        <span>{question.team} team</span>
-                        <span>•</span>
-                        <span>{question.platform}</span>
-                        <span>•</span>
-                        <span>{formatDate(question.timestamp)}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              )}
             </div>
           ) : (
             <div className="guardian-empty">
@@ -380,6 +418,11 @@ export function GuardianDashboard() {
           )}
         </div>
       </div>
+
+      <GuardianRecordModal
+        open={showRecordModal}
+        onClose={() => setShowRecordModal(false)}
+      />
     </div>
   );
 }

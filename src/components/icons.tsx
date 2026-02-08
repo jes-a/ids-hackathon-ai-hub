@@ -270,4 +270,11 @@ export const FileImage = createIcon(
   </>
 );
 
+export const Video = createIcon(
+  <>
+    <path d="m22 8-6 4 6 4V8Z" />
+    <rect x="2" y="4" width="14" height="12" rx="2" />
+  </>
+);
+
 export const AlertTriangleFill = AlertTriangle;
