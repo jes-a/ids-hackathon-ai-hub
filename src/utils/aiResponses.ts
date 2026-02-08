@@ -186,6 +186,38 @@ Use Auto Layout with multiples of 8px for spacing between elements.`,
       { title: 'GitHub Source', type: 'github', url: 'https://github.com/carbon-design-system/carbon' },
     ],
   },
+  contained: {
+    role: 'assistant',
+    content: `**Short answer:** Use a **Contained List** for simple, single-column content inside smaller containers. Use a **Data Table** when you need multi-column data with sorting, filtering, or batch actions.
+
+**Here's how to decide:**
+
+| Criteria | Contained List | Data Table |
+|----------|----------------|------------|
+| Columns | Single column only | Multiple columns |
+| Best context | Cards, sidebars, popovers | Full-width page areas |
+| Interactivity | Inline actions (toggles, links) | Sorting, filtering, batch actions, expandable rows |
+| Data volume | Short lists (5–25 items) | Large datasets with pagination |
+| Content type | Homogeneous items | Heterogeneous data (text, numbers, statuses) |
+
+**Use a Contained List when:**
+- Displaying grouped items inside a card or sidebar
+- Items have a single header and uniform row structure
+- You need optional inline actions but not sorting
+
+**Use a Data Table when:**
+- You need multiple column headers
+- Users need to sort, filter, or search the data
+- You need row selection or batch actions
+- Data requires pagination or expandable rows
+
+💡 **Tip:** If you're tempted to add a second column to a Contained List, that's your signal to switch to a Data Table.`,
+    trustBadge: 'best-practice',
+    sources: [
+      { title: 'Carbon Contained List', type: 'storybook', url: 'https://carbondesignsystem.com/components/contained-list/usage' },
+      { title: 'Carbon Data Table', type: 'storybook', url: 'https://carbondesignsystem.com/components/data-table/usage' },
+    ],
+  },
 };
 
 const pmResponses: Record<string, AIResponse> = {
