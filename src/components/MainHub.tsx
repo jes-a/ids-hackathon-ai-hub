@@ -94,7 +94,20 @@ export function MainHub() {
         }}
       >
         <div className="hub-sidebar-header" style={{ borderColor: 'var(--carbon-border-subtle)' }}>
-          <div className="hub-sidebar-title-row">
+          <button
+            type="button"
+            className="hub-sidebar-title-row"
+            onClick={() => router.push('/')}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              cursor: 'pointer',
+              textAlign: 'left',
+              width: '100%',
+            }}
+            aria-label="Go to home"
+          >
             <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
               <rect width="32" height="32" fill="var(--carbon-interactive)" />
               <path d="M8 8h16v4H8V8zm0 6h16v4H8v-4zm0 6h10v4H8v-4z" fill="white" />
@@ -102,7 +115,7 @@ export function MainHub() {
             <span className="hub-sidebar-title" style={{ color: 'var(--carbon-text-primary)' }}>
               Carbon AI Hub
             </span>
-          </div>
+          </button>
           <div
             className="hub-sidebar-role"
             style={{
@@ -159,13 +172,14 @@ export function MainHub() {
                 style={{
                   position: 'absolute',
                   top: 'calc(100% + 0.5rem)',
+                  left: 0,
                   right: 0,
+                  width: '100%',
                   zIndex: 10,
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '0.25rem',
                   padding: '0.5rem',
-                  minWidth: '12rem',
                   backgroundColor: 'var(--carbon-bg-primary)',
                   border: '1px solid var(--carbon-border-subtle)',
                   borderRadius: 'var(--carbon-radius)',

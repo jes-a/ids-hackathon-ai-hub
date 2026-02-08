@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, ThumbsDown, Calendar } from '@/components/icons';
+import { Send, Sparkles, ThumbsDown, Calendar, Github, Figma, FileCode } from '@/components/icons';
 import { useRole } from '@/contexts/RoleContext';
 import { generateAIResponse } from '@/utils/aiResponses';
 
@@ -13,11 +13,35 @@ const guidedQuestions = [
   "What's the component maturity status?",
 ];
 
+const PLACEHOLDER_PREFIX = 'Ask about ';
+const placeholderSuggestions = [
+  'carbon components, patterns, or guidelines...',
+  'button component props',
+  'accessible modals',
+  'dataTable specs',
+  'spacing tokens',
+  'component maturity',
+];
+
 export function ChatInterface() {
   const { userRole, chatHistory, addMessage } = useRole();
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [suggestionIndex, setSuggestionIndex] = useState(0);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+    inputRef.current?.setSelectionRange(0, 0);
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSuggestionIndex((i) => (i + 1) % placeholderSuggestions.length);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -188,6 +212,71 @@ export function ChatInterface() {
         </p>
       </header>
 
+      <div className="chat-input-wrap">
+        <div className="chat-input-inner">
+          <div className="chat-input-row">
+            <div className="chat-input-prefix-wrap">
+              {!input && (
+                <div className="chat-input-placeholder-overlay" aria-hidden>
+                  <span className="chat-input-placeholder-prefix">{PLACEHOLDER_PREFIX}</span>
+                  <span
+                    key={suggestionIndex}
+                    className="chat-input-placeholder-suggestion"
+                    style={{ color: 'var(--carbon-text-placeholder)' }}
+                  >
+                    {placeholderSuggestions[suggestionIndex]}
+                  </span>
+                </div>
+              )}
+              <input
+                ref={inputRef}
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                placeholder=""
+                className="chat-input chat-input-with-prefix"
+                style={{
+                  backgroundColor: 'var(--carbon-field)',
+                  color: 'var(--carbon-text-primary)',
+                  borderColor: 'var(--carbon-border-subtle)',
+                  borderRadius: 'var(--carbon-radius)',
+                  fontFamily: 'var(--carbon-font-family)',
+                  fontSize: '16px',
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--carbon-interactive)';
+                  e.currentTarget.style.boxShadow = '0 0 0 2px var(--carbon-interactive-transparent)';
+                  e.currentTarget.setSelectionRange(0, 0);
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--carbon-border-subtle)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              />
+            </div>
+            <button
+              onClick={handleSend}
+              disabled={!input.trim()}
+              className="chat-send"
+              style={{
+                backgroundColor: input.trim() ? 'var(--carbon-interactive)' : 'var(--carbon-bg-hover)',
+                borderColor: input.trim() ? 'var(--carbon-interactive)' : 'var(--carbon-border-subtle)',
+                color: 'var(--carbon-text-on-color)',
+                borderRadius: 'var(--carbon-radius)',
+                opacity: input.trim() ? 1 : 0.5,
+                cursor: input.trim() ? 'pointer' : 'not-allowed',
+                fontSize: '16px',
+                fontWeight: '500',
+              }}
+            >
+              <Send width={20} height={20} />
+              <span>Send</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div
         ref={chatContainerRef}
         className="hub-view-scroll"
@@ -214,7 +303,6 @@ export function ChatInterface() {
                     backgroundColor: 'var(--carbon-layer-01)',
                     borderColor: 'var(--carbon-border-subtle)',
                     color: 'var(--carbon-text-primary)',
-                    borderRadius: 'var(--carbon-radius)',
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = 'var(--carbon-bg-hover)';
@@ -306,9 +394,9 @@ export function ChatInterface() {
                               borderRadius: 'var(--carbon-radius)',
                             }}
                           >
-                            {source.type === 'figma' && 'F'}
-                            {source.type === 'storybook' && 'S'}
-                            {source.type === 'github' && 'G'}
+                            {source.type === 'figma' && <Figma width={20} height={20} />}
+                            {source.type === 'storybook' && <FileCode width={20} height={20} />}
+                            {source.type === 'github' && <Github width={20} height={20} />}
                             {source.type === 'chromatic' && 'C'}
                           </div>
                           <span className="text-sm" style={{ color: 'var(--carbon-text-primary)' }}>
@@ -380,61 +468,6 @@ export function ChatInterface() {
             )}
           </div>
         )}
-      </div>
-
-      <div
-        className="chat-input-wrap"
-        style={{
-          backgroundColor: 'var(--carbon-bg-secondary)',
-          borderColor: 'var(--carbon-interactive)',
-        }}
-      >
-        <div className="chat-input-inner">
-          <div className="chat-input-row">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Ask about Carbon components, patterns, or guidelines..."
-              className="chat-input"
-              style={{
-                backgroundColor: 'var(--carbon-field)',
-                color: 'var(--carbon-text-primary)',
-                borderColor: 'var(--carbon-border-subtle)',
-                borderRadius: 'var(--carbon-radius)',
-                fontFamily: 'var(--carbon-font-family)',
-                fontSize: '16px',
-              }}
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = 'var(--carbon-interactive)';
-                e.currentTarget.style.boxShadow = '0 0 0 2px var(--carbon-interactive-transparent)';
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.borderColor = 'var(--carbon-border-subtle)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-            />
-            <button
-              onClick={handleSend}
-              disabled={!input.trim()}
-              className="chat-send"
-              style={{
-                backgroundColor: input.trim() ? 'var(--carbon-interactive)' : 'var(--carbon-bg-hover)',
-                borderColor: input.trim() ? 'var(--carbon-interactive)' : 'var(--carbon-border-subtle)',
-                color: 'var(--carbon-text-on-color)',
-                borderRadius: 'var(--carbon-radius)',
-                opacity: input.trim() ? 1 : 0.5,
-                cursor: input.trim() ? 'pointer' : 'not-allowed',
-                fontSize: '16px',
-                fontWeight: '500',
-              }}
-            >
-              <Send width={20} height={20} />
-              <span>Send</span>
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );
