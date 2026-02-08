@@ -1,4 +1,4 @@
-# Carbon Design System AI Hub
+# IDS Hackathon: AI Hub (based on Carbon Design System)
 
 AI-powered documentation assistant for IBM's Carbon Design System.
 
