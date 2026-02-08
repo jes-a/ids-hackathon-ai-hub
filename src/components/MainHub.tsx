@@ -119,7 +119,7 @@ export function MainHub() {
           <button
             type="button"
             className="hub-sidebar-title-row"
-            onClick={() => setShowTeamModal(true)}
+            onClick={handleChangeRoles}
             style={{
               background: 'none',
               border: 'none',
@@ -131,7 +131,7 @@ export function MainHub() {
               alignItems: 'center',
               gap: '0.5rem',
             }}
-            aria-label="Show team"
+            aria-label="Back to role selection"
           >
             <CarbonLogo size={24} color="var(--carbon-interactive)" />
             <span className="hub-sidebar-title" style={{ color: 'var(--carbon-text-primary)' }}>
