@@ -133,44 +133,45 @@ export function MainHub() {
               <span className="hub-sidebar-role-label" style={{ color: 'var(--carbon-text-secondary)' }}>
                 {getRoleLabel()}
               </span>
-              <div style={{ marginLeft: 'auto', position: 'relative' }}>
-                <span
-                  className="hub-sidebar-role-toggle"
-                  style={{
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    color: 'var(--carbon-text-secondary)',
-                    borderRadius: 'var(--carbon-radius)',
-                    width: '1.5rem',
-                    height: '1.5rem',
-                    lineHeight: 1,
-                    fontSize: '0.85rem',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  ▾
-                </span>
-                {roleMenuOpen && (
-                  <div
-                    className="hub-sidebar-role-menu"
-                    style={{
-                      position: 'absolute',
-                      top: 'calc(100% + 0.5rem)',
-                      right: 0,
-                      zIndex: 10,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.25rem',
-                      padding: '0.5rem',
-                      minWidth: '12rem',
-                      backgroundColor: 'var(--carbon-bg-primary)',
-                      border: '1px solid var(--carbon-border-subtle)',
-                      borderRadius: 'var(--carbon-radius)',
-                      boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-                    }}
-                  >
+              <span
+                className="hub-sidebar-role-toggle"
+                style={{
+                  marginLeft: 'auto',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  color: 'var(--carbon-text-secondary)',
+                  borderRadius: 'var(--carbon-radius)',
+                  width: '1.5rem',
+                  height: '1.5rem',
+                  lineHeight: 1,
+                  fontSize: '0.85rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                ▾
+              </span>
+            </button>
+            {roleMenuOpen && (
+              <div
+                className="hub-sidebar-role-menu"
+                style={{
+                  position: 'absolute',
+                  top: 'calc(100% + 0.5rem)',
+                  right: 0,
+                  zIndex: 10,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.25rem',
+                  padding: '0.5rem',
+                  minWidth: '12rem',
+                  backgroundColor: 'var(--carbon-bg-primary)',
+                  border: '1px solid var(--carbon-border-subtle)',
+                  borderRadius: 'var(--carbon-radius)',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                }}
+              >
                 <button
                   className="hub-sidebar-role-menu-item"
                   onClick={() => handleRoleChange('guardian')}
@@ -224,10 +225,8 @@ export function MainHub() {
                 >
                   Sign out
                 </button>
-                  </div>
-                )}
               </div>
-            </button>
+            )}
           </div>
         </div>
 

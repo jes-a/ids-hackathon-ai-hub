@@ -66,6 +66,108 @@ export function ChatInterface() {
     );
   };
 
+  const renderComponentPreview = (preview: (typeof chatHistory)[number]['componentPreview']) => {
+    if (!preview) return null;
+
+    if (preview === 'datatable') {
+      return (
+        <div
+          className="chat-component-preview"
+          style={{
+            backgroundColor: 'var(--carbon-layer-01)',
+            borderColor: 'var(--carbon-border-subtle)',
+            borderRadius: 'var(--carbon-radius)',
+          }}
+        >
+          <p className="chat-component-preview-title" style={{ color: 'var(--carbon-text-secondary)' }}>
+            Interactive example:
+          </p>
+          <div className="chat-component-table-wrap" style={{ borderColor: 'var(--carbon-border-subtle)' }}>
+            <table className="chat-component-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Status</th>
+                  <th>Role</th>
+                  <th>Location</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { name: 'Alex Chen', status: 'Active', role: 'Developer', location: 'San Francisco' },
+                  { name: 'Jordan Smith', status: 'Active', role: 'Designer', location: 'New York' },
+                  { name: 'Morgan Lee', status: 'Inactive', role: 'PM', location: 'Austin' },
+                  { name: 'Casey Rivera', status: 'Active', role: 'Developer', location: 'Seattle' },
+                ].map((row) => (
+                  <tr key={row.name}>
+                    <td>{row.name}</td>
+                    <td>{row.status}</td>
+                    <td>{row.role}</td>
+                    <td>{row.location}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      );
+    }
+
+    if (preview === 'button') {
+      return (
+        <div
+          className="chat-component-preview"
+          style={{
+            backgroundColor: 'var(--carbon-layer-01)',
+            borderColor: 'var(--carbon-border-subtle)',
+            borderRadius: 'var(--carbon-radius)',
+          }}
+        >
+          <p className="chat-component-preview-title" style={{ color: 'var(--carbon-text-secondary)' }}>
+            Interactive example:
+          </p>
+          <div className="chat-component-button-row">
+            <button
+              type="button"
+              className="chat-component-button"
+              style={{
+                backgroundColor: 'var(--carbon-interactive)',
+                borderColor: 'var(--carbon-interactive)',
+                color: 'var(--carbon-text-on-color)',
+              }}
+            >
+              Primary Button
+            </button>
+            <button
+              type="button"
+              className="chat-component-button"
+              style={{
+                backgroundColor: 'transparent',
+                borderColor: 'var(--carbon-interactive)',
+                color: 'var(--carbon-interactive)',
+              }}
+            >
+              Secondary
+            </button>
+            <button
+              type="button"
+              className="chat-component-button ghost"
+              style={{
+                backgroundColor: 'transparent',
+                borderColor: 'transparent',
+                color: 'var(--carbon-interactive)',
+              }}
+            >
+              Ghost
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <div className="hub-view">
       <header
@@ -168,6 +270,8 @@ export function ChatInterface() {
                   )}
                   <div className="whitespace-pre-wrap">{message.content}</div>
                 </div>
+
+                {message.role === 'assistant' && message.componentPreview && renderComponentPreview(message.componentPreview)}
 
                 {message.role === 'assistant' && message.sources && message.sources.length > 0 && (
                   <div className="chat-sources">

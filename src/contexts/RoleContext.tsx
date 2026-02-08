@@ -14,6 +14,7 @@ export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  componentPreview?: 'datatable' | 'button';
   sources?: {
     title: string;
     type: 'figma' | 'storybook' | 'github' | 'chromatic';

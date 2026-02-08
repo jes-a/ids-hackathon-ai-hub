@@ -34,6 +34,7 @@ import { DataTable } from '@carbon/react';
 - ARIA labels for sortable columns
 - Screen reader support for row selection`,
     trustBadge: 'official',
+    componentPreview: 'datatable',
     sources: [
       { title: 'Open in Figma', type: 'figma', url: 'https://www.figma.com/@carbon' },
       { title: 'View in Storybook', type: 'storybook', url: 'https://react.carbondesignsystem.com/?path=/story/components-datatable' },
@@ -72,6 +73,7 @@ import { Add } from '@carbon/icons-react';
 </Button>
 \`\`\``,
     trustBadge: 'official',
+    componentPreview: 'button',
     sources: [
       { title: 'Open in Figma', type: 'figma', url: 'https://www.figma.com/@carbon' },
       { title: 'View in Storybook', type: 'storybook', url: 'https://react.carbondesignsystem.com/?path=/story/components-button' },
@@ -108,6 +110,7 @@ const designerResponses: Record<string, AIResponse> = {
 - Interactive elements: 3:1 contrast
 - Focus indicator: 2px solid $focus (#0f62fe)`,
     trustBadge: 'official',
+    componentPreview: 'datatable',
     sources: [
       { title: 'Open in Figma', type: 'figma', url: 'https://www.figma.com/@carbon' },
       { title: 'View in Storybook', type: 'storybook', url: 'https://react.carbondesignsystem.com/?path=/story/components-datatable' },
@@ -182,6 +185,7 @@ const pmResponses: Record<string, AIResponse> = {
 - @carbon/react: ^11.x
 - No breaking changes expected`,
     trustBadge: 'best-practice',
+    componentPreview: 'datatable',
     sources: [
       { title: 'View in Storybook', type: 'storybook', url: 'https://react.carbondesignsystem.com/?path=/story/components-datatable' },
       { title: 'GitHub Source', type: 'github', url: 'https://github.com/carbon-design-system/carbon' },

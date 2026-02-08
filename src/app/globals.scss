@@ -390,6 +390,63 @@ button {
   font-size: 0.75rem;
 }
 
+.chat-component-preview {
+  border: 1px solid;
+  padding: 1rem;
+}
+
+.chat-component-preview-title {
+  font-size: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.chat-component-table-wrap {
+  border: 1px solid;
+  border-radius: var(--carbon-radius);
+  overflow: hidden;
+}
+
+.chat-component-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.chat-component-table th,
+.chat-component-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--carbon-border-subtle);
+}
+
+.chat-component-table thead th {
+  background: var(--carbon-layer-02);
+  color: var(--carbon-text-primary);
+  font-weight: 600;
+}
+
+.chat-component-table tbody tr:nth-child(even) {
+  background: var(--carbon-layer-02);
+}
+
+.chat-component-button-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.chat-component-button {
+  padding: 0.65rem 1.25rem;
+  border: 1px solid;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.chat-component-button.ghost {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
 .chat-sources {
   display: flex;
   flex-direction: column;
