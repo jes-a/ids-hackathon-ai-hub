@@ -3,9 +3,10 @@
 import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Send, Sparkles, ThumbsUp, ThumbsDown, Calendar, Github, Figma, FileCode } from '@/components/icons';
+import { Send, Sparkles, ThumbsUp, ThumbsDown, Calendar, Github, Figma, FileCode, Video } from '@/components/icons';
 import { useRole } from '@/contexts/RoleContext';
 import { generateAIResponse } from '@/utils/aiResponses';
+import { GuardianRecordModal } from '@/components/GuardianRecordModal';
 
 const guidedQuestions = [
   'What are the specs for a DataTable?',
@@ -27,10 +28,12 @@ const placeholderSuggestions = [
 
 export function ChatInterface() {
   const { userRole, chatHistory, addMessage } = useRole();
+  const isGuardian = userRole === 'guardian';
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [suggestionIndex, setSuggestionIndex] = useState(0);
   const [feedbackGivenForMessageIds, setFeedbackGivenForMessageIds] = useState<Set<string>>(new Set());
+  const [showRecordModal, setShowRecordModal] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const lastQuestionRef = useRef<HTMLDivElement>(null);
@@ -471,6 +474,43 @@ export function ChatInterface() {
                   </div>
                 )}
 
+                {message.role === 'assistant' && isGuardian && message.suggestVideoAnswer && (
+                  <div
+                    className="chat-record-answer"
+                    style={{
+                      marginTop: '1rem',
+                      padding: '1rem',
+                      backgroundColor: 'var(--carbon-layer-01)',
+                      border: '1px solid var(--carbon-border-subtle)',
+                      borderRadius: 'var(--carbon-radius)',
+                    }}
+                  >
+                    <p className="text-sm mb-2" style={{ color: 'var(--carbon-text-secondary)' }}>
+                      Optional: A recorded answer can be shared with the requester and added to the knowledge base.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setShowRecordModal(true)}
+                      className="chat-action-button"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        backgroundColor: 'var(--carbon-interactive)',
+                        borderColor: 'var(--carbon-interactive)',
+                        color: 'var(--carbon-text-on-color)',
+                        borderRadius: 'var(--carbon-radius)',
+                        padding: '0.5rem 1rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 500,
+                      }}
+                    >
+                      <Video width={18} height={18} />
+                      <span>Record an answer</span>
+                    </button>
+                  </div>
+                )}
+
                 {message.role === 'assistant' && (
                   <div className="chat-actions">
                     <button
@@ -556,6 +596,11 @@ export function ChatInterface() {
       </div>
 
       {hasMessages && chatInputBlock}
+
+      <GuardianRecordModal
+        open={showRecordModal}
+        onClose={() => setShowRecordModal(false)}
+      />
     </div>
   );
 }

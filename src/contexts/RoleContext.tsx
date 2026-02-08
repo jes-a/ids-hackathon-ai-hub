@@ -21,6 +21,8 @@ export interface ChatMessage {
     url: string;
   }[];
   trustBadge?: 'official' | 'best-practice';
+  /** When true, show guardian "Record an answer" CTA (optional video escalation) */
+  suggestVideoAnswer?: boolean;
   timestamp: Date;
 }
 
