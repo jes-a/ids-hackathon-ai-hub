@@ -93,7 +93,7 @@ export function ChatInterface() {
       const aiResponse = generateAIResponse(userMessage, userRole);
       addMessage(aiResponse);
       setIsTyping(false);
-    }, 1000);
+    }, 1500);
   };
 
   const handleQuestionClick = (question: string) => {
@@ -109,7 +109,7 @@ export function ChatInterface() {
       const aiResponse = generateAIResponse(question, userRole);
       addMessage(aiResponse);
       setIsTyping(false);
-    }, 1000);
+    }, 1500);
   };
 
   const handleUnhelpful = () => {

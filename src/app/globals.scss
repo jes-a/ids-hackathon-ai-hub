@@ -503,6 +503,48 @@ button {
   h1 { font-size: 1.25rem; }
   h2 { font-size: 1.125rem; }
   h3 { font-size: 1rem; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    border: 1px solid var(--carbon-border-subtle);
+    border-radius: var(--carbon-radius);
+    overflow: hidden;
+  }
+
+  thead {
+    background: var(--carbon-layer-02, var(--carbon-bg-secondary));
+  }
+
+  th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--carbon-text-primary);
+    border-bottom: 1px solid var(--carbon-border-subtle);
+  }
+
+  td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--carbon-border-subtle);
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  tbody tr:nth-child(even) {
+    background: var(--carbon-layer-01, var(--carbon-bg-hover));
+  }
+
+  @media (max-width: 640px) {
+    table {
+      display: block;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
 }
 
 .chat-bubble-badge {
