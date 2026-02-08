@@ -116,6 +116,8 @@ export const Moon = createIcon(
   </>
 );
 
+export const ChevronDown = createIcon(<path d="M6 9l6 6 6-6" />);
+
 export const LogOut = createIcon(
   <>
     <path d="M10 17l-1 4 4-1" />
@@ -166,6 +168,13 @@ export const Sparkles = createIcon(
   <>
     <path d="M12 3l1.6 3.6L17 8l-3.4 1.4L12 13l-1.6-3.6L7 8l3.4-1.4L12 3z" />
     <path d="M5 14l0.8 1.8L8 16.6l-2.2 0.8L5 19l-0.8-1.6L2 16.6l2.2-0.8L5 14z" />
+  </>
+);
+
+export const ThumbsUp = createIcon(
+  <>
+    <path d="M7 10v12" />
+    <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z" />
   </>
 );
 

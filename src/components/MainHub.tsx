@@ -11,14 +11,12 @@ import {
   Shield,
   Activity,
   TrendingUp,
-  Sun,
-  Moon,
   Github,
   Figma,
   FileCode,
+  LogOut,
 } from '@/components/icons';
 import { useRole } from '@/contexts/RoleContext';
-import { useTheme } from '@/contexts/ThemeContext';
 import { useRouter } from 'next/navigation';
 import { ChatInterface } from '@/components/ChatInterface';
 import { UIAuditUpload } from '@/components/UIAuditUpload';
@@ -31,11 +29,11 @@ type GuardianView = 'dashboard' | 'health' | 'insights';
 
 export function MainHub() {
   const { userRole, setUserRole, clearHistory } = useRole();
-  const { theme, toggleTheme } = useTheme();
   const router = useRouter();
   const [standardView, setStandardView] = useState<StandardView>('chat');
   const [guardianView, setGuardianView] = useState<GuardianView>('dashboard');
-  const [roleMenuOpen, setRoleMenuOpen] = useState(false);
+  const [showTeamModal, setShowTeamModal] = useState(false);
+  const [teamImageError, setTeamImageError] = useState(false);
 
   useEffect(() => {
     if (!userRole) {
@@ -43,16 +41,28 @@ export function MainHub() {
     }
   }, [userRole, router]);
 
-  const handleLogout = () => {
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowTeamModal(false);
+    };
+    if (showTeamModal) {
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = '';
+    };
+  }, [showTeamModal]);
+
+  useEffect(() => {
+    if (showTeamModal) setTeamImageError(false);
+  }, [showTeamModal]);
+
+  const handleChangeRoles = () => {
     setUserRole(null);
     clearHistory();
     router.push('/');
-  };
-
-  const handleRoleChange = (role: 'guardian' | 'developer' | 'designer') => {
-    setUserRole(role);
-    clearHistory();
-    setRoleMenuOpen(false);
   };
 
   const getRoleLabel = () => {
@@ -94,140 +104,31 @@ export function MainHub() {
         }}
       >
         <div className="hub-sidebar-header" style={{ borderColor: 'var(--carbon-border-subtle)' }}>
-          <div className="hub-sidebar-title-row">
-            <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+          <button
+            type="button"
+            className="hub-sidebar-title-row"
+            onClick={() => setShowTeamModal(true)}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              cursor: 'pointer',
+              textAlign: 'left',
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+            }}
+            aria-label="Show team"
+          >
+            <svg width="24" height="24" viewBox="0 0 32 32" fill="none" aria-hidden>
               <rect width="32" height="32" fill="var(--carbon-interactive)" />
               <path d="M8 8h16v4H8V8zm0 6h16v4H8v-4zm0 6h10v4H8v-4z" fill="white" />
             </svg>
             <span className="hub-sidebar-title" style={{ color: 'var(--carbon-text-primary)' }}>
               Carbon AI Hub
             </span>
-          </div>
-          <div
-            className="hub-sidebar-role"
-            style={{
-              backgroundColor: 'var(--carbon-bg-primary)',
-              borderColor: 'var(--carbon-border-subtle)',
-              borderRadius: 'var(--carbon-radius)',
-              position: 'relative',
-              padding: 0,
-            }}
-          >
-            <button
-              type="button"
-              className="hub-sidebar-role-main"
-              onClick={() => setRoleMenuOpen((open) => !open)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                width: '100%',
-                padding: '0.5rem 0.75rem',
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-              }}
-              aria-label="Toggle role menu"
-            >
-              {renderRoleIcon()}
-              <span className="hub-sidebar-role-label" style={{ color: 'var(--carbon-text-secondary)' }}>
-                {getRoleLabel()}
-              </span>
-              <span
-                className="hub-sidebar-role-toggle"
-                style={{
-                  marginLeft: 'auto',
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  color: 'var(--carbon-text-secondary)',
-                  borderRadius: 'var(--carbon-radius)',
-                  width: '1.5rem',
-                  height: '1.5rem',
-                  lineHeight: 1,
-                  fontSize: '0.85rem',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                ▾
-              </span>
-            </button>
-            {roleMenuOpen && (
-              <div
-                className="hub-sidebar-role-menu"
-                style={{
-                  position: 'absolute',
-                  top: 'calc(100% + 0.5rem)',
-                  right: 0,
-                  zIndex: 10,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.25rem',
-                  padding: '0.5rem',
-                  minWidth: '12rem',
-                  backgroundColor: 'var(--carbon-bg-primary)',
-                  border: '1px solid var(--carbon-border-subtle)',
-                  borderRadius: 'var(--carbon-radius)',
-                  boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-                }}
-              >
-                <button
-                  className="hub-sidebar-role-menu-item"
-                  onClick={() => handleRoleChange('guardian')}
-                  style={{
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    textAlign: 'left',
-                    padding: '0.4rem 0.5rem',
-                    color: 'var(--carbon-text-primary)',
-                  }}
-                >
-                  Guardian
-                </button>
-                <button
-                  className="hub-sidebar-role-menu-item"
-                  onClick={() => handleRoleChange('developer')}
-                  style={{
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    textAlign: 'left',
-                    padding: '0.4rem 0.5rem',
-                    color: 'var(--carbon-text-primary)',
-                  }}
-                >
-                  Developer
-                </button>
-                <button
-                  className="hub-sidebar-role-menu-item"
-                  onClick={() => handleRoleChange('designer')}
-                  style={{
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    textAlign: 'left',
-                    padding: '0.4rem 0.5rem',
-                    color: 'var(--carbon-text-primary)',
-                  }}
-                >
-                  Designer
-                </button>
-                <div style={{ height: 1, backgroundColor: 'var(--carbon-border-subtle)', margin: '0.25rem 0' }} />
-                <button
-                  className="hub-sidebar-role-menu-item"
-                  onClick={handleLogout}
-                  style={{
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    textAlign: 'left',
-                    padding: '0.4rem 0.5rem',
-                    color: 'var(--carbon-text-secondary)',
-                  }}
-                >
-                  Sign out
-                </button>
-              </div>
-            )}
-          </div>
+          </button>
         </div>
 
         {isGuardian && (
@@ -402,7 +303,8 @@ export function MainHub() {
 
         <div className="hub-sidebar-footer" style={{ borderColor: 'var(--carbon-border-subtle)' }}>
           <button
-            onClick={toggleTheme}
+            type="button"
+            onClick={handleChangeRoles}
             className="hub-nav-button"
             style={{
               backgroundColor: 'transparent',
@@ -411,8 +313,8 @@ export function MainHub() {
               borderRadius: 'var(--carbon-radius)',
             }}
           >
-            {theme === 'light' ? <Moon width={20} height={20} /> : <Sun width={20} height={20} />}
-            <span>{theme === 'light' ? 'Dark mode' : 'Light mode'}</span>
+            <LogOut width={20} height={20} />
+            <span>Sign out</span>
           </button>
         </div>
       </aside>
@@ -446,6 +348,94 @@ export function MainHub() {
           </>
         )}
       </main>
+
+      {showTeamModal && (
+        <div
+          className="hub-team-modal-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="TEAM-X illustration"
+          onClick={() => setShowTeamModal(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(0,0,0,0.7)',
+            padding: '2rem',
+          }}
+        >
+          <div
+            className="hub-team-modal-content"
+            style={{
+              position: 'relative',
+              maxWidth: '100%',
+              maxHeight: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {teamImageError ? (
+              <div
+                style={{
+                  padding: '2rem',
+                  maxWidth: '24rem',
+                  backgroundColor: 'var(--carbon-layer-01)',
+                  border: '1px solid var(--carbon-border-subtle)',
+                  borderRadius: 'var(--carbon-radius)',
+                  color: 'var(--carbon-text-secondary)',
+                  fontSize: '0.875rem',
+                  textAlign: 'center',
+                }}
+              >
+                <p style={{ marginBottom: '0.5rem', color: 'var(--carbon-text-primary)' }}>
+                  Image not found
+                </p>
+                <p>
+                  Add your TEAM-X illustration as <strong>team-x.png</strong> in the{' '}
+                  <strong>public</strong> folder, then refresh.
+                </p>
+              </div>
+            ) : (
+              <img
+                src="/team-x.png"
+                alt="TEAM-X - Team illustration"
+                onError={() => setTeamImageError(true)}
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: '90vh',
+                  width: 'auto',
+                  height: 'auto',
+                  objectFit: 'contain',
+                  borderRadius: 'var(--carbon-radius)',
+                }}
+              />
+            )}
+            <button
+              type="button"
+              onClick={() => setShowTeamModal(false)}
+              aria-label="Close"
+              style={{
+                position: 'absolute',
+                top: '-2.5rem',
+                right: 0,
+                background: 'var(--carbon-layer-01)',
+                border: '1px solid var(--carbon-border-subtle)',
+                color: 'var(--carbon-text-primary)',
+                borderRadius: 'var(--carbon-radius)',
+                padding: '0.5rem 1rem',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

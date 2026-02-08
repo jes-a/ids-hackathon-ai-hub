@@ -118,6 +118,41 @@ const designerResponses: Record<string, AIResponse> = {
       { title: 'Chromatic Diff', type: 'chromatic', url: 'https://www.chromatic.com/library?appId=carbon' },
     ],
   },
+  button: {
+    role: 'assistant',
+    content: `Button specifications for designers:
+
+**Carbon Button Kinds:**
+- Primary: High emphasis, one per section
+- Secondary: Medium emphasis, supporting actions
+- Tertiary: Low emphasis, less prominent
+- Ghost: Minimal emphasis, inline or overlay
+- Danger: Destructive or irreversible actions
+
+**Spacing & Sizing:**
+- Height: sm 32px, md 40px, lg 48px, xl 48px, 2xl 64px
+- Padding: $spacing-05 (16px) horizontal for md
+- Icon + text gap: $spacing-03 (8px)
+- Min width: 48px for touch targets
+
+**Colors (Light Theme):**
+- Primary bg: $interactive-01 (#0f62fe)
+- Secondary border: $interactive-01
+- Ghost/danger: $interactive-01 text only
+- Hover: $hover-primary, $hover-secondary, etc.
+
+**Accessibility:**
+- Minimum 44×44px touch target
+- Focus: 2px solid $focus
+- Contrast: 4.5:1 for text`,
+    trustBadge: 'official',
+    componentPreview: 'button',
+    sources: [
+      { title: 'Open in Figma', type: 'figma', url: 'https://www.figma.com/@carbon' },
+      { title: 'View in Storybook', type: 'storybook', url: 'https://react.carbondesignsystem.com/?path=/story/components-button' },
+      { title: 'GitHub Source', type: 'github', url: 'https://github.com/carbon-design-system/carbon' },
+    ],
+  },
   spacing: {
     role: 'assistant',
     content: `Carbon spacing tokens follow an 8px base grid system (mini-unit):
@@ -345,6 +380,10 @@ export function generateAIResponse(query: string, role: UserRole): AIResponse {
     case 'designer':
       response = findBestMatch(query, designerResponses);
       break;
+    case 'guardian':
+      /* Guardian uses developer responses so button/datatable examples and componentPreview work */
+      response = findBestMatch(query, developerResponses);
+      break;
     case 'product-manager':
       response = findBestMatch(query, pmResponses);
       break;
@@ -366,6 +405,7 @@ function generateDefaultResponse(query: string, role: UserRole): AIResponse {
   const roleContext: Record<string, string> = {
     developer: 'code examples, props, and implementation details',
     designer: 'spacing tokens, color values, and visual specifications',
+    guardian: 'component examples, props, and implementation details',
     'product-manager': 'component maturity, compliance scores, and planning data',
     'project-owner': 'governance metrics, ROI data, and strategic alignment',
   };

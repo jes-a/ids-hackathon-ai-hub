@@ -58,3 +58,6 @@ Most of your edits will be in:
 - Custom SVG icon set in `src/components/icons.tsx`
 - Sass for styling (CSS variables in `src/app/globals.scss`)
 - Mock AI responses (no API keys required)
+
+---
+*Small update to test branch push.*
