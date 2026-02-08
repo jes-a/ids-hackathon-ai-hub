@@ -255,24 +255,24 @@ export function ChatInterface() {
                 }}
               />
             </div>
-            <button
-              onClick={handleSend}
-              disabled={!input.trim()}
-              className="chat-send"
-              style={{
-                backgroundColor: input.trim() ? 'var(--carbon-interactive)' : 'var(--carbon-bg-hover)',
-                borderColor: input.trim() ? 'var(--carbon-interactive)' : 'var(--carbon-border-subtle)',
-                color: 'var(--carbon-text-on-color)',
-                borderRadius: 'var(--carbon-radius)',
-                opacity: input.trim() ? 1 : 0.5,
-                cursor: input.trim() ? 'pointer' : 'not-allowed',
-                fontSize: '16px',
-                fontWeight: '500',
-              }}
-            >
-              <Send width={20} height={20} />
-              <span>Send</span>
-            </button>
+            {input.trim() && (
+              <button
+                type="button"
+                onClick={handleSend}
+                className="chat-send"
+                style={{
+                  backgroundColor: 'var(--carbon-interactive)',
+                  borderColor: 'var(--carbon-interactive)',
+                  color: 'var(--carbon-text-on-color)',
+                  borderRadius: 'var(--carbon-radius)',
+                  fontSize: '16px',
+                  fontWeight: '500',
+                }}
+              >
+                <Send width={20} height={20} />
+                <span>Send</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -284,15 +284,6 @@ export function ChatInterface() {
       >
         {chatHistory.length === 0 ? (
           <div className="chat-empty">
-            <div className="chat-empty-header">
-              <h2 className="text-xl mb-4" style={{ color: 'var(--carbon-text-primary)' }}>
-                Guided question framing
-              </h2>
-              <p className="text-sm mb-6" style={{ color: 'var(--carbon-text-secondary)' }}>
-                Try these example questions to get started
-              </p>
-            </div>
-
             <div className="chat-empty-grid">
               {guidedQuestions.map((question, index) => (
                 <button
