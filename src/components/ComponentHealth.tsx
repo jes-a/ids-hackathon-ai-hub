@@ -80,18 +80,14 @@ export function ComponentHealth() {
   return (
     <div className="hub-view">
       <header
-        className="hub-view-header"
+        className="hub-view-header hub-dark-header"
         style={{
-          backgroundColor: 'var(--carbon-bg-secondary)',
-          borderColor: 'var(--carbon-border-subtle)',
+          backgroundColor: '#161616',
+          borderColor: '#262626',
         }}
       >
-        <h1 className="text-2xl mb-2" style={{ color: 'var(--carbon-text-primary)' }}>
-          Component health
-        </h1>
-        <p className="text-sm" style={{ color: 'var(--carbon-text-secondary)' }}>
-          Identify components with high designer uncertainty
-        </p>
+        <h1>Component health</h1>
+        <p>Identify components with high designer uncertainty</p>
       </header>
 
       <div className="hub-view-scroll" style={{ backgroundColor: 'var(--carbon-bg-primary)' }}>
@@ -109,26 +105,26 @@ export function ComponentHealth() {
             </h2>
             <div className="health-summary-grid">
               <div>
-                <p className="text-xs mb-1" style={{ color: 'var(--carbon-text-secondary)' }}>
+                <p style={{ color: 'var(--carbon-text-secondary)', fontSize: '0.75rem', margin: '0 0 0.25rem 0' }}>
                   Components tracked
                 </p>
-                <p className="text-2xl" style={{ color: 'var(--carbon-text-primary)' }}>
+                <p style={{ color: 'var(--carbon-text-primary)', fontSize: '2rem', fontWeight: 600, margin: 0, lineHeight: 1 }}>
                   {componentStats.length}
                 </p>
               </div>
               <div>
-                <p className="text-xs mb-1" style={{ color: 'var(--carbon-text-secondary)' }}>
+                <p style={{ color: 'var(--carbon-text-secondary)', fontSize: '0.75rem', margin: '0 0 0.25rem 0' }}>
                   Needs attention
                 </p>
-                <p className="text-2xl" style={{ color: 'var(--carbon-support-error)' }}>
+                <p style={{ color: 'var(--carbon-support-error)', fontSize: '2rem', fontWeight: 600, margin: 0, lineHeight: 1 }}>
                   {componentStats.filter((c) => c.status === 'needs-attention').length}
                 </p>
               </div>
               <div>
-                <p className="text-xs mb-1" style={{ color: 'var(--carbon-text-secondary)' }}>
+                <p style={{ color: 'var(--carbon-text-secondary)', fontSize: '0.75rem', margin: '0 0 0.25rem 0' }}>
                   Warning
                 </p>
-                <p className="text-2xl" style={{ color: 'var(--carbon-support-warning)' }}>
+                <p style={{ color: 'var(--carbon-support-warning)', fontSize: '2rem', fontWeight: 600, margin: 0, lineHeight: 1 }}>
                   {componentStats.filter((c) => c.status === 'warning').length}
                 </p>
               </div>
@@ -144,8 +140,9 @@ export function ComponentHealth() {
                   className="health-card"
                   style={{
                     backgroundColor: 'var(--carbon-layer-01)',
-                    borderColor: 'var(--carbon-border-subtle)',
-                    borderRadius: 'var(--carbon-radius)',
+                    border: '1px solid var(--carbon-border-subtle)',
+                    borderLeft: `4px solid ${getStatusColor(comp.status)}`,
+                    borderRadius: 0,
                   }}
                 >
                   <div className="health-card-header">
@@ -154,33 +151,37 @@ export function ComponentHealth() {
                         {comp.name}
                       </h3>
                       <div className="health-status">
-                        <StatusIcon width={16} height={16} style={{ color: getStatusColor(comp.status) }} />
                         <span
                           className="health-status-tag"
                           style={{
-                            backgroundColor: 'var(--carbon-bg-secondary)',
-                            borderColor: 'var(--carbon-border-subtle)',
+                            backgroundColor: 'transparent',
+                            border: `1px solid ${getStatusColor(comp.status)}`,
                             color: getStatusColor(comp.status),
-                            borderRadius: 'var(--carbon-radius)',
+                            borderRadius: 'var(--carbon-radius-pill)',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.25rem',
                           }}
                         >
+                          <StatusIcon width={12} height={12} />
                           {comp.status.replace('-', ' ')}
                         </span>
                         {comp.trend === 'increasing' && (
-                          <div className="health-status-trend">
-                            <TrendingUp width={16} height={16} style={{ color: 'var(--carbon-support-warning)' }} />
-                            <span
-                              className="health-status-tag"
-                              style={{
-                                backgroundColor: 'var(--carbon-bg-secondary)',
-                                borderColor: 'var(--carbon-border-subtle)',
-                                color: 'var(--carbon-support-warning)',
-                                borderRadius: 'var(--carbon-radius)',
-                              }}
-                            >
-                              increasing
-                            </span>
-                          </div>
+                          <span
+                            className="health-status-tag"
+                            style={{
+                              backgroundColor: 'transparent',
+                              border: '1px solid var(--carbon-support-error)',
+                              color: 'var(--carbon-support-error)',
+                              borderRadius: 'var(--carbon-radius-pill)',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.25rem',
+                            }}
+                          >
+                            <TrendingUp width={12} height={12} />
+                            increasing
+                          </span>
                         )}
                       </div>
                     </div>
@@ -223,8 +224,8 @@ export function ComponentHealth() {
                           key={context}
                           className="health-context"
                           style={{
-                            backgroundColor: 'var(--carbon-bg-secondary)',
-                            borderColor: 'var(--carbon-border-subtle)',
+                            backgroundColor: 'transparent',
+                            border: '1px solid var(--carbon-border-subtle)',
                             color: 'var(--carbon-text-secondary)',
                             borderRadius: 'var(--carbon-radius)',
                           }}
@@ -240,7 +241,10 @@ export function ComponentHealth() {
                       className="health-insight"
                       style={{
                         backgroundColor: 'var(--carbon-bg-secondary)',
-                        borderColor: 'var(--carbon-support-error)',
+                        border: '1px solid var(--carbon-border-subtle)',
+                        borderLeft: '4px solid var(--carbon-support-error)',
+                        borderRadius: 0,
+                        padding: '0.75rem 1rem',
                       }}
                     >
                       <p className="text-xs" style={{ color: 'var(--carbon-text-primary)' }}>

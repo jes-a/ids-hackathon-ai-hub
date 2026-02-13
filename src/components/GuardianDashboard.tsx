@@ -2,14 +2,15 @@
 
 import { useState, useMemo } from 'react';
 import {
-  TrendingUp,
-  TrendingDown,
-  Minus,
   AlertCircle,
   CheckCircle,
   MessageCircle,
   Calendar,
   Video,
+  ArrowUp,
+  ArrowDown,
+  Repeat,
+  StarFilled,
 } from '@/components/icons';
 import { mockQuestions, clusterQuestions, type QuestionCluster, type DesignerQuestion } from '@/utils/mockQuestions';
 import { GuardianRecordModal } from '@/components/GuardianRecordModal';
@@ -28,32 +29,37 @@ export function GuardianDashboard() {
   const stats = {
     totalQuestions: mockQuestions.length,
     activeClusters: clusters.length,
-    newTopics: clusters.filter((c) => c.trend === 'new').length,
-    increasingTopics: clusters.filter((c) => c.trend === 'increasing').length,
-  };
-
-  const getTrendIcon = (trend: string) => {
-    switch (trend) {
-      case 'new':
-      case 'increasing':
-        return TrendingUp;
-      case 'decreasing':
-        return TrendingDown;
-      default:
-        return Minus;
-    }
+    increasingTopics: clusters.filter((c) => c.trend === 'increasing' || c.trend === 'new').length,
+    escalations: 11,
   };
 
   const getTrendColor = (trend: string) => {
     switch (trend) {
       case 'new':
         return 'var(--carbon-support-info)';
-      case 'increasing':
-        return 'var(--carbon-support-warning)';
       case 'decreasing':
-        return 'var(--carbon-text-placeholder)';
+        return 'var(--carbon-support-success)';
+      case 'recurring':
+        return 'var(--carbon-support-warning)';
+      case 'increasing':
+        return 'var(--carbon-support-error)';
       default:
         return 'var(--carbon-text-secondary)';
+    }
+  };
+
+  const getTrendIcon = (trend: string) => {
+    switch (trend) {
+      case 'increasing':
+        return ArrowUp;
+      case 'decreasing':
+        return ArrowDown;
+      case 'recurring':
+        return Repeat;
+      case 'new':
+        return StarFilled;
+      default:
+        return null;
     }
   };
 
@@ -76,18 +82,14 @@ export function GuardianDashboard() {
   return (
     <div className="hub-view">
       <header
-        className="hub-view-header"
+        className="hub-view-header hub-dark-header"
         style={{
-          backgroundColor: 'var(--carbon-bg-secondary)',
-          borderColor: 'var(--carbon-border-subtle)',
+          backgroundColor: '#161616',
+          borderColor: '#262626',
         }}
       >
-        <h1 className="text-2xl mb-2" style={{ color: 'var(--carbon-text-primary)' }}>
-          Design System Guardian Hub
-        </h1>
-        <p className="text-sm" style={{ color: 'var(--carbon-text-secondary)' }}>
-          Monitor designer uncertainty and guide design system evolution
-        </p>
+        <h1>Design System Guardian Hub</h1>
+        <p>Monitor designer uncertainty and guide design system evolution</p>
       </header>
 
       <div
@@ -102,10 +104,10 @@ export function GuardianDashboard() {
             className="guardian-stat"
             style={{ borderColor: 'var(--carbon-border-subtle)', borderRadius: 'var(--carbon-radius)' }}
           >
-            <p className="text-xs mb-1" style={{ color: 'var(--carbon-text-secondary)' }}>
+            <p style={{ color: 'var(--carbon-text-secondary)', fontSize: '0.75rem', margin: '0 0 0.25rem 0' }}>
               Total questions (7 days)
             </p>
-            <p className="text-3xl" style={{ color: 'var(--carbon-text-primary)' }}>
+            <p style={{ color: 'var(--carbon-text-primary)', fontSize: '2.00rem', fontWeight: 600, margin: 0, lineHeight: 1 }}>
               {stats.totalQuestions}
             </p>
           </div>
@@ -113,10 +115,10 @@ export function GuardianDashboard() {
             className="guardian-stat"
             style={{ borderColor: 'var(--carbon-border-subtle)', borderRadius: 'var(--carbon-radius)' }}
           >
-            <p className="text-xs mb-1" style={{ color: 'var(--carbon-text-secondary)' }}>
+            <p style={{ color: 'var(--carbon-text-secondary)', fontSize: '0.75rem', margin: '0 0 0.25rem 0' }}>
               Question clusters
             </p>
-            <p className="text-3xl" style={{ color: 'var(--carbon-text-primary)' }}>
+            <p style={{ color: 'var(--carbon-text-primary)', fontSize: '2rem', fontWeight: 600, margin: 0, lineHeight: 1 }}>
               {stats.activeClusters}
             </p>
           </div>
@@ -124,22 +126,22 @@ export function GuardianDashboard() {
             className="guardian-stat"
             style={{ borderColor: 'var(--carbon-border-subtle)', borderRadius: 'var(--carbon-radius)' }}
           >
-            <p className="text-xs mb-1" style={{ color: 'var(--carbon-text-secondary)' }}>
-              New topics
+            <p style={{ color: 'var(--carbon-text-secondary)', fontSize: '0.75rem', margin: '0 0 0.25rem 0' }}>
+              Increasing topics
             </p>
-            <p className="text-3xl" style={{ color: 'var(--carbon-support-info)' }}>
-              {stats.newTopics}
+            <p style={{ color: 'var(--carbon-support-success)', fontSize: '2rem', fontWeight: 600, margin: 0, lineHeight: 1 }}>
+              {stats.increasingTopics}
             </p>
           </div>
           <div
             className="guardian-stat"
             style={{ borderColor: 'var(--carbon-border-subtle)', borderRadius: 'var(--carbon-radius)' }}
           >
-            <p className="text-xs mb-1" style={{ color: 'var(--carbon-text-secondary)' }}>
-              Increasing topics
+            <p style={{ color: 'var(--carbon-text-secondary)', fontSize: '0.75rem', margin: '0 0 0.25rem 0' }}>
+              Escalations to guardians
             </p>
-            <p className="text-3xl" style={{ color: 'var(--carbon-support-warning)' }}>
-              {stats.increasingTopics}
+            <p style={{ color: 'var(--carbon-support-error)', fontSize: '2rem', fontWeight: 600, margin: 0, lineHeight: 1 }}>
+              {stats.escalations}
             </p>
           </div>
         </div>
@@ -159,7 +161,6 @@ export function GuardianDashboard() {
             </h2>
             <div className="guardian-list-items">
               {clusters.map((cluster) => {
-                const TrendIcon = getTrendIcon(cluster.trend);
                 return (
                   <button
                     key={cluster.id}
@@ -176,45 +177,71 @@ export function GuardianDashboard() {
                     }}
                   >
                     <div className="guardian-cluster-header">
-                      <div className="guardian-cluster-info">
-                        <h3 className="text-sm mb-1" style={{ color: 'var(--carbon-text-primary)' }}>
-                          {cluster.topic}
-                        </h3>
-                        <div className="guardian-cluster-tags">
-                          {cluster.component.map((comp) => (
-                            <span
-                              key={comp}
-                              className="guardian-tag"
-                              style={{
-                                backgroundColor: 'var(--carbon-bg-secondary)',
-                                borderColor: 'var(--carbon-border-subtle)',
-                                color: 'var(--carbon-text-secondary)',
-                                borderRadius: 'var(--carbon-radius)',
-                              }}
-                            >
-                              {comp}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="guardian-cluster-trend">
-                        <TrendIcon width={16} height={16} style={{ color: getTrendColor(cluster.trend) }} />
+                      <h3
+                        style={{
+                          color: 'var(--carbon-text-primary)',
+                          fontSize: '0.9375rem',
+                          fontWeight: 600,
+                          lineHeight: 1.4,
+                          margin: 0,
+                          flex: 1,
+                        }}
+                      >
+                        {cluster.topic}
+                      </h3>
+                      {(() => {
+                        const TrendIcon = getTrendIcon(cluster.trend);
+                        return (
+                          <span
+                            className="guardian-trend-tag"
+                            style={{
+                              backgroundColor: 'transparent',
+                              border: `1px solid ${getTrendColor(cluster.trend)}`,
+                              color: getTrendColor(cluster.trend),
+                              borderRadius: 'var(--carbon-radius-pill)',
+                              padding: '0.2rem 0.625rem',
+                              fontSize: '0.75rem',
+                              fontWeight: 400,
+                              whiteSpace: 'nowrap',
+                              flexShrink: 0,
+                              alignSelf: 'flex-start',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.25rem',
+                            }}
+                          >
+                            {TrendIcon && <TrendIcon width={12} height={12} />}
+                            {cluster.trend}
+                          </span>
+                        );
+                      })()}
+                    </div>
+                    <div className="guardian-cluster-tags" style={{ marginTop: '0.5rem' }}>
+                      {cluster.component.map((comp) => (
                         <span
-                          className="guardian-trend-tag"
+                          key={comp}
+                          className="guardian-tag"
                           style={{
-                            backgroundColor: 'var(--carbon-bg-secondary)',
-                            borderColor: 'var(--carbon-border-subtle)',
-                            color: getTrendColor(cluster.trend),
+                            backgroundColor: 'transparent',
+                            border: '1px solid var(--carbon-border-subtle)',
+                            color: 'var(--carbon-text-secondary)',
                             borderRadius: 'var(--carbon-radius)',
                           }}
                         >
-                          {cluster.trend}
+                          {comp}
                         </span>
-                      </div>
+                      ))}
                     </div>
-                    <div className="guardian-cluster-meta" style={{ color: 'var(--carbon-text-secondary)' }}>
+                    <div
+                      className="guardian-cluster-meta"
+                      style={{
+                        color: 'var(--carbon-text-secondary)',
+                        fontSize: '0.8125rem',
+                        marginTop: '0.5rem',
+                      }}
+                    >
                       <span>{cluster.frequency} questions</span>
-                      <span>•</span>
+                      <span>·</span>
                       <span>Last asked {formatDate(cluster.lastAsked)}</span>
                     </div>
                   </button>

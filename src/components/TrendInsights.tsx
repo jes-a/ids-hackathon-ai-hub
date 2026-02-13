@@ -112,18 +112,14 @@ export function TrendInsights() {
   return (
     <div className="hub-view">
       <header
-        className="hub-view-header"
+        className="hub-view-header hub-dark-header"
         style={{
-          backgroundColor: 'var(--carbon-bg-secondary)',
-          borderColor: 'var(--carbon-border-subtle)',
+          backgroundColor: '#161616',
+          borderColor: '#262626',
         }}
       >
-        <h1 className="text-2xl mb-2" style={{ color: 'var(--carbon-text-primary)' }}>
-          Trend insights
-        </h1>
-        <p className="text-sm" style={{ color: 'var(--carbon-text-secondary)' }}>
-          Pattern detection and strategic recommendations for design system evolution
-        </p>
+        <h1>Trend insights</h1>
+        <p>Pattern detection and strategic recommendations for design system evolution</p>
       </header>
 
       <div className="hub-view-scroll" style={{ backgroundColor: 'var(--carbon-bg-primary)' }}>
@@ -143,44 +139,44 @@ export function TrendInsights() {
               <div>
                 <div className="trend-summary-row">
                   <Clock width={16} height={16} style={{ color: 'var(--carbon-text-secondary)' }} />
-                  <p className="text-xs" style={{ color: 'var(--carbon-text-secondary)' }}>
+                  <p style={{ color: 'var(--carbon-text-secondary)', fontSize: '0.75rem', margin: 0 }}>
                     Total questions
                   </p>
                 </div>
-                <p className="text-2xl" style={{ color: 'var(--carbon-text-primary)' }}>
+                <p style={{ color: 'var(--carbon-text-primary)', fontSize: '2rem', fontWeight: 600, margin: 0, lineHeight: 1 }}>
                   {totalQuestions}
                 </p>
               </div>
               <div>
                 <div className="trend-summary-row">
                   <TrendingUp width={16} height={16} style={{ color: 'var(--carbon-text-secondary)' }} />
-                  <p className="text-xs" style={{ color: 'var(--carbon-text-secondary)' }}>
+                  <p style={{ color: 'var(--carbon-text-secondary)', fontSize: '0.75rem', margin: 0 }}>
                     Avg per day
                   </p>
                 </div>
-                <p className="text-2xl" style={{ color: 'var(--carbon-text-primary)' }}>
+                <p style={{ color: 'var(--carbon-text-primary)', fontSize: '2rem', fontWeight: 600, margin: 0, lineHeight: 1 }}>
                   {avgQuestionsPerDay}
                 </p>
               </div>
               <div>
                 <div className="trend-summary-row">
                   <Users width={16} height={16} style={{ color: 'var(--carbon-text-secondary)' }} />
-                  <p className="text-xs" style={{ color: 'var(--carbon-text-secondary)' }}>
+                  <p style={{ color: 'var(--carbon-text-secondary)', fontSize: '0.75rem', margin: 0 }}>
                     Active teams
                   </p>
                 </div>
-                <p className="text-2xl" style={{ color: 'var(--carbon-text-primary)' }}>
+                <p style={{ color: 'var(--carbon-text-primary)', fontSize: '2rem', fontWeight: 600, margin: 0, lineHeight: 1 }}>
                   6
                 </p>
               </div>
               <div>
                 <div className="trend-summary-row">
                   <Layers width={16} height={16} style={{ color: 'var(--carbon-text-secondary)' }} />
-                  <p className="text-xs" style={{ color: 'var(--carbon-text-secondary)' }}>
+                  <p style={{ color: 'var(--carbon-text-secondary)', fontSize: '0.75rem', margin: 0 }}>
                     Patterns detected
                   </p>
                 </div>
-                <p className="text-2xl" style={{ color: 'var(--carbon-text-primary)' }}>
+                <p style={{ color: 'var(--carbon-text-primary)', fontSize: '2rem', fontWeight: 600, margin: 0, lineHeight: 1 }}>
                   {insights.length}
                 </p>
               </div>
@@ -190,10 +186,19 @@ export function TrendInsights() {
               <p className="text-xs mb-3" style={{ color: 'var(--carbon-text-secondary)' }}>
                 Daily question volume
               </p>
-              <div className="trend-bars">
+              <div className="trend-bars" style={{ borderBottom: '1px solid var(--carbon-border-subtle)' }}>
                 {weeklyTrend.map((day, i) => (
                   <div key={i} className="trend-bar">
-                    <div className="trend-bar-column">
+                    <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: 'var(--carbon-text-primary)', textAlign: 'center' }}>
+                      {day.count}
+                    </span>
+                    <div className="trend-bar-column" style={{ position: 'relative' }}>
+                      {/* Grid lines */}
+                      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', pointerEvents: 'none' }}>
+                        <div style={{ borderBottom: '1px dashed var(--carbon-border-subtle)' }} />
+                        <div style={{ borderBottom: '1px dashed var(--carbon-border-subtle)' }} />
+                        <div />
+                      </div>
                       <div
                         className="trend-bar-fill"
                         style={{
@@ -202,7 +207,7 @@ export function TrendInsights() {
                         }}
                       />
                     </div>
-                    <p className="text-xs" style={{ color: 'var(--carbon-text-secondary)' }}>
+                    <p style={{ fontSize: '0.6875rem', color: 'var(--carbon-text-secondary)', margin: '0.25rem 0 0 0' }}>
                       {day.date}
                     </p>
                   </div>
@@ -234,20 +239,25 @@ export function TrendInsights() {
                           {insight.pattern}
                         </h3>
                       </div>
-                      <div className="trend-card-impact">
-                        <ImpactIcon width={16} height={16} style={{ color: getImpactColor(insight.impact) }} />
-                        <span
-                          className="trend-impact-tag"
-                          style={{
-                            backgroundColor: 'var(--carbon-bg-secondary)',
-                            borderColor: 'var(--carbon-border-subtle)',
-                            color: getImpactColor(insight.impact),
-                            borderRadius: 'var(--carbon-radius)',
-                          }}
-                        >
-                          {insight.impact} impact
-                        </span>
-                      </div>
+                      <span
+                        className="trend-impact-tag"
+                        style={{
+                          backgroundColor: 'transparent',
+                          border: `1px solid ${getImpactColor(insight.impact)}`,
+                          color: getImpactColor(insight.impact),
+                          borderRadius: 'var(--carbon-radius-pill)',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.25rem',
+                          padding: '0.2rem 0.625rem',
+                          fontSize: '0.75rem',
+                          whiteSpace: 'nowrap',
+                          flexShrink: 0,
+                        }}
+                      >
+                        <ImpactIcon width={12} height={12} />
+                        {insight.impact} impact
+                      </span>
                     </div>
 
                     <p className="text-sm mb-4" style={{ color: 'var(--carbon-text-secondary)' }}>
@@ -265,8 +275,8 @@ export function TrendInsights() {
                               key={team}
                               className="trend-tag"
                               style={{
-                                backgroundColor: 'var(--carbon-bg-secondary)',
-                                borderColor: 'var(--carbon-border-subtle)',
+                                backgroundColor: 'transparent',
+                                border: '1px solid var(--carbon-border-subtle)',
                                 color: 'var(--carbon-text-secondary)',
                                 borderRadius: 'var(--carbon-radius)',
                               }}
@@ -286,9 +296,9 @@ export function TrendInsights() {
                               key={comp}
                               className="trend-tag trend-tag-primary"
                               style={{
-                                backgroundColor: 'var(--carbon-interactive)',
-                                borderColor: 'var(--carbon-interactive)',
-                                color: 'var(--carbon-text-on-color)',
+                                backgroundColor: 'transparent',
+                                border: '1px solid var(--carbon-interactive)',
+                                color: 'var(--carbon-interactive)',
                                 borderRadius: 'var(--carbon-radius)',
                               }}
                             >
@@ -303,7 +313,9 @@ export function TrendInsights() {
                       className="trend-recommendation"
                       style={{
                         backgroundColor: 'var(--carbon-bg-secondary)',
-                        borderColor: 'var(--carbon-interactive)',
+                        border: '1px solid var(--carbon-border-subtle)',
+                        borderLeft: '4px solid var(--carbon-interactive)',
+                        borderRadius: 0,
                       }}
                     >
                       <p className="text-xs mb-1" style={{ color: 'var(--carbon-text-placeholder)' }}>

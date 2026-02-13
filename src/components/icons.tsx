@@ -28,7 +28,7 @@ import {
   LogoGithub       as _LogoGithub,
   LogoFigma        as _LogoFigma,
   SendAlt          as _SendAlt,
-  WatsonxAi        as _WatsonxAi,
+  AiAgentInvocation as _AiAgentInvocation,
   ThumbsUp         as _ThumbsUp,
   ThumbsDown       as _ThumbsDown,
   Calendar         as _Calendar,
@@ -44,6 +44,10 @@ import {
   Image            as _Image,
   Video            as _Video,
   Document         as _Document,
+  ArrowUp          as _ArrowUp,
+  ArrowDown        as _ArrowDown,
+  Repeat           as _Repeat,
+  StarFilled       as _StarFilled,
 } from '@carbon/icons-react';
 
 /* ------------------------------------------------------------------ */
@@ -97,7 +101,7 @@ export const MessageCircle  = wrapCarbon(_Chat);
 export const Send           = wrapCarbon(_SendAlt);
 
 // AI / assistant
-export const Sparkles       = wrapCarbon(_WatsonxAi);
+export const Sparkles       = wrapCarbon(_AiAgentInvocation);
 
 // File / document
 export const Upload         = wrapCarbon(_Upload);
@@ -149,3 +153,9 @@ export const Figma          = wrapCarbon(_LogoFigma);
 
 // Media
 export const Video          = wrapCarbon(_Video);
+
+// Trend arrows
+export const ArrowUp        = wrapCarbon(_ArrowUp);
+export const ArrowDown      = wrapCarbon(_ArrowDown);
+export const Repeat         = wrapCarbon(_Repeat);
+export const StarFilled     = wrapCarbon(_StarFilled);

@@ -147,21 +147,14 @@ export function UIAuditUpload() {
   return (
     <div className="hub-view">
       <header
-        className="hub-view-header"
+        className="hub-view-header hub-dark-header"
         style={{
-          backgroundColor: 'var(--carbon-bg-secondary)',
-          borderColor: 'var(--carbon-border-subtle)',
+          backgroundColor: '#161616',
+          borderColor: '#262626',
         }}
       >
-        <div className="hub-view-header-title">
-          <Upload width={24} height={24} style={{ color: 'var(--carbon-interactive)' }} />
-          <h1 className="text-2xl" style={{ color: 'var(--carbon-text-primary)' }}>
-            UI audit
-          </h1>
-        </div>
-        <p className="text-sm" style={{ color: 'var(--carbon-text-secondary)' }}>
-          Upload a screenshot to check Carbon Design System compliance
-        </p>
+        <h1>UI audit</h1>
+        <p>Upload a screenshot to check Carbon Design System compliance</p>
       </header>
 
       <div className="hub-view-scroll" style={{ backgroundColor: 'var(--carbon-bg-primary)' }}>
@@ -173,9 +166,10 @@ export function UIAuditUpload() {
               onDrop={handleDrop}
               className="audit-dropzone"
               style={{
-                borderColor: isDragging ? 'var(--carbon-interactive)' : 'var(--carbon-border-subtle)',
+                border: `2px dashed ${isDragging ? 'var(--carbon-interactive)' : 'var(--carbon-border-subtle)'}`,
                 backgroundColor: isDragging ? 'var(--carbon-bg-hover)' : 'var(--carbon-layer-01)',
-                borderRadius: 'var(--carbon-radius)',
+                borderRadius: 0,
+                transition: 'border-color 70ms cubic-bezier(0.2, 0, 0.38, 0.9), background-color 70ms cubic-bezier(0.2, 0, 0.38, 0.9)',
               }}
             >
               <Upload width={64} height={64} className="mx-auto mb-6" style={{ color: 'var(--carbon-text-placeholder)' }} />
@@ -287,13 +281,37 @@ export function UIAuditUpload() {
                     }}
                   >
                     <div className="audit-score">
-                      <div>
+                      <div style={{ flex: 1 }}>
                         <h3 className="text-lg mb-1" style={{ color: 'var(--carbon-text-primary)' }}>
                           Carbon compliance score
                         </h3>
-                        <p className="text-sm" style={{ color: 'var(--carbon-text-secondary)' }}>
+                        <p className="text-sm" style={{ color: 'var(--carbon-text-secondary)', margin: '0 0 1rem 0' }}>
                           Based on design system standards
                         </p>
+                        {/* Progress bar */}
+                        <div
+                          style={{
+                            height: 6,
+                            borderRadius: 3,
+                            backgroundColor: 'var(--carbon-bg-secondary, #e0e0e0)',
+                            overflow: 'hidden',
+                          }}
+                        >
+                          <div
+                            style={{
+                              height: '100%',
+                              width: `${auditResult.score}%`,
+                              borderRadius: 3,
+                              backgroundColor:
+                                auditResult.score >= 90
+                                  ? '#24a148'
+                                  : auditResult.score >= 70
+                                  ? '#f1c21b'
+                                  : '#da1e28',
+                              transition: 'width 0.6s cubic-bezier(0.2, 0, 0.38, 0.9)',
+                            }}
+                          />
+                        </div>
                       </div>
                       <div
                         className="audit-score-value"
@@ -336,8 +354,9 @@ export function UIAuditUpload() {
                             className="audit-issue"
                             style={{
                               backgroundColor: 'var(--carbon-layer-01)',
-                              borderColor: 'var(--carbon-border-subtle)',
-                              borderRadius: 'var(--carbon-radius)',
+                              border: '1px solid var(--carbon-border-subtle)',
+                              borderLeft: `4px solid ${color}`,
+                              borderRadius: 0,
                             }}
                           >
                             <div className="audit-issue-inner">

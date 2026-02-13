@@ -3,8 +3,9 @@
 import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Send, Sparkles, ThumbsUp, ThumbsDown, Calendar, Github, Figma, FileCode, Video } from '@/components/icons';
-import { useRole } from '@/contexts/RoleContext';
+import { Send, ThumbsUp, ThumbsDown, Calendar, Github, Figma, FileCode, Video, CheckCircle } from '@/components/icons';
+import { ArrowRight, ColorPalette, Code } from '@carbon/icons-react';
+import { useRole, type OfficeHoursGuardian } from '@/contexts/RoleContext';
 import { generateAIResponse } from '@/utils/aiResponses';
 import { GuardianRecordModal } from '@/components/GuardianRecordModal';
 
@@ -32,14 +33,14 @@ export function ChatInterface() {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [suggestionIndex, setSuggestionIndex] = useState(0);
-  const [feedbackGivenForMessageIds, setFeedbackGivenForMessageIds] = useState<Set<string>>(new Set());
+  const [feedbackGivenForMessageIds, setFeedbackGivenForMessageIds] = useState<Map<string, 'helpful' | 'unhelpful'>>(new Map());
   const [showRecordModal, setShowRecordModal] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const lastQuestionRef = useRef<HTMLDivElement>(null);
+  const lastAssistantRef = useRef<HTMLDivElement>(null);
 
-  const handleFeedback = (messageId: string) => {
-    setFeedbackGivenForMessageIds((prev) => new Set(prev).add(messageId));
+  const handleFeedback = (messageId: string, type: 'helpful' | 'unhelpful') => {
+    setFeedbackGivenForMessageIds((prev) => new Map(prev).set(messageId, type));
   };
 
   const hasMessages = chatHistory.length > 0;
@@ -68,13 +69,13 @@ export function ChatInterface() {
     return () => clearTimeout(t);
   }, [hasMessages, isTyping]);
 
-  /* When answer is shown, scroll so the question is at the top; user scrolls down to read long answers */
+  /* When a new assistant reply appears, scroll it to the top of the viewport so the user sees the beginning */
   useEffect(() => {
     if (!hasMessages || isTyping) return;
     const last = chatHistory[chatHistory.length - 1];
     if (last?.role === 'assistant') {
       const t = setTimeout(() => {
-        lastQuestionRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        lastAssistantRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
       }, 100);
       return () => clearTimeout(t);
     }
@@ -116,9 +117,182 @@ export function ChatInterface() {
   };
 
   const handleUnhelpful = () => {
-    alert(
-      'Escalation options:\n\n• Contact Design System Guardian\n• Book Office Hours\n• Submit Feedback\n\nThese features would connect you with the Carbon team.'
-    );
+    addMessage({
+      role: 'assistant',
+      content: 'Sorry to hear that wasn\'t helpful. Here are some ways I can assist you further:',
+      suggestedQuestions: [
+        'Book office hours with a guardian',
+        'Rephrase my question',
+        'Show me the Carbon documentation',
+        'What components are available?',
+      ],
+    });
+  };
+
+  /* ── Office hours booking flow ─────────────────────────── */
+
+  const designerGuardians: OfficeHoursGuardian[] = [
+    { name: 'Sarah Chen', specialty: 'Component patterns & layout', nextSlot: 'Tomorrow at 10:00 AM', avatar: 'SC' },
+    { name: 'Marcus Rivera', specialty: 'Color, typography & theming', nextSlot: 'Tomorrow at 2:00 PM', avatar: 'MR' },
+    { name: 'Aisha Patel', specialty: 'Accessibility & inclusive design', nextSlot: 'Wed at 11:00 AM', avatar: 'AP' },
+  ];
+
+  const developerGuardians: OfficeHoursGuardian[] = [
+    { name: 'James O\'Brien', specialty: 'React components & hooks', nextSlot: 'Tomorrow at 11:30 AM', avatar: 'JO' },
+    { name: 'Lin Wei', specialty: 'Theming, tokens & SCSS', nextSlot: 'Tomorrow at 3:00 PM', avatar: 'LW' },
+    { name: 'Priya Sharma', specialty: 'Testing & accessibility APIs', nextSlot: 'Thu at 9:00 AM', avatar: 'PS' },
+  ];
+
+  const handleBookOfficeHours = () => {
+    addMessage({
+      role: 'assistant',
+      content: 'I can help you book a session with a design system guardian. What type of guardian would you like to speak with?',
+      officeHours: { step: 'select-role' },
+    });
+  };
+
+  const handleSelectGuardianRole = (role: 'designer' | 'developer') => {
+    const label = role === 'designer' ? 'Designer' : 'Developer';
+    addMessage({
+      role: 'user',
+      content: `I'd like to speak with a ${label} guardian`,
+    });
+
+    setIsTyping(true);
+    setTimeout(() => {
+      const guardians = role === 'designer' ? designerGuardians : developerGuardians;
+      addMessage({
+        role: 'assistant',
+        content: `Here are the available ${label} guardians and their next open slots:`,
+        officeHours: { step: 'select-guardian', role, guardians },
+      });
+      setIsTyping(false);
+    }, 800);
+  };
+
+  const handleBookGuardian = (guardian: OfficeHoursGuardian) => {
+    addMessage({
+      role: 'user',
+      content: `Book with ${guardian.name} — ${guardian.nextSlot}`,
+    });
+
+    setIsTyping(true);
+    setTimeout(() => {
+      addMessage({
+        role: 'assistant',
+        content: `Your office hours session has been booked.`,
+        officeHours: {
+          step: 'confirmed',
+          booking: {
+            guardian: guardian.name,
+            time: guardian.nextSlot,
+            specialty: guardian.specialty,
+          },
+        },
+      });
+
+      /* Follow-up message asking if the user needs more help */
+      setTimeout(() => {
+        addMessage({
+          role: 'assistant',
+          content: 'Is there anything else I can help you with?',
+          suggestedQuestions: [
+            'What are the specs for a DataTable?',
+            'Show me the Button component props',
+            'What\'s the spacing token for medium gaps?',
+            'How do I implement accessible modals?',
+          ],
+        });
+        setIsTyping(false);
+      }, 600);
+    }, 1000);
+  };
+
+  const renderOfficeHours = (officeHours: NonNullable<(typeof chatHistory)[number]['officeHours']>) => {
+    if (officeHours.step === 'select-role') {
+      return (
+        <div className="chat-oh-grid">
+          <button type="button" className="chat-oh-card" onClick={() => handleSelectGuardianRole('designer')}>
+            <div className="chat-oh-card-accent" />
+            <div className="chat-oh-card-body">
+              <div className="chat-oh-card-icon">
+                <ColorPalette size={24} fill="var(--carbon-interactive)" />
+              </div>
+              <div>
+                <h4 className="chat-oh-card-title">Designer guardian</h4>
+                <p className="chat-oh-card-desc">Visual specs, tokens, patterns & Figma guidance</p>
+              </div>
+              <ArrowRight size={16} className="chat-oh-card-arrow" />
+            </div>
+          </button>
+          <button type="button" className="chat-oh-card" onClick={() => handleSelectGuardianRole('developer')}>
+            <div className="chat-oh-card-accent" />
+            <div className="chat-oh-card-body">
+              <div className="chat-oh-card-icon">
+                <Code size={24} fill="var(--carbon-interactive)" />
+              </div>
+              <div>
+                <h4 className="chat-oh-card-title">Developer guardian</h4>
+                <p className="chat-oh-card-desc">React components, props, theming & code</p>
+              </div>
+              <ArrowRight size={16} className="chat-oh-card-arrow" />
+            </div>
+          </button>
+        </div>
+      );
+    }
+
+    if (officeHours.step === 'select-guardian' && officeHours.guardians) {
+      return (
+        <div className="chat-oh-guardian-grid">
+          {officeHours.guardians.map((g) => (
+            <button key={g.name} type="button" className="chat-oh-guardian-card" onClick={() => handleBookGuardian(g)}>
+              <div className="chat-oh-avatar">{g.avatar}</div>
+              <div className="chat-oh-guardian-info">
+                <span className="chat-oh-guardian-name">{g.name}</span>
+                <span className="chat-oh-guardian-specialty">{g.specialty}</span>
+                <span className="chat-oh-guardian-slot">
+                  <Calendar width={12} height={12} />
+                  {g.nextSlot}
+                </span>
+              </div>
+              <ArrowRight size={16} className="chat-oh-card-arrow" />
+            </button>
+          ))}
+        </div>
+      );
+    }
+
+    if (officeHours.step === 'confirmed' && officeHours.booking) {
+      return (
+        <div className="chat-oh-confirmed">
+          <div className="chat-oh-confirmed-header">
+            <CheckCircle width={24} height={24} style={{ color: 'var(--carbon-support-success)' }} />
+            <span className="chat-oh-confirmed-title">Meeting booked</span>
+          </div>
+          <div className="chat-oh-confirmed-details">
+            <div className="chat-oh-confirmed-row">
+              <span className="chat-oh-confirmed-label">Guardian</span>
+              <span className="chat-oh-confirmed-value">{officeHours.booking.guardian}</span>
+            </div>
+            <div className="chat-oh-confirmed-row">
+              <span className="chat-oh-confirmed-label">Specialty</span>
+              <span className="chat-oh-confirmed-value">{officeHours.booking.specialty}</span>
+            </div>
+            <div className="chat-oh-confirmed-row">
+              <span className="chat-oh-confirmed-label">When</span>
+              <span className="chat-oh-confirmed-value">{officeHours.booking.time}</span>
+            </div>
+          </div>
+          <p className="chat-oh-confirmed-note">
+            <Calendar width={14} height={14} />
+            Added to your calendar
+          </p>
+        </div>
+      );
+    }
+
+    return null;
   };
 
   const renderComponentPreview = (preview: (typeof chatHistory)[number]['componentPreview']) => {
@@ -293,21 +467,14 @@ export function ChatInterface() {
   return (
     <div className={`hub-view${hasMessages ? ' hub-view--chat-mode' : ''}`}>
       <header
-        className="hub-view-header"
+        className="hub-view-header hub-dark-header"
         style={{
-          backgroundColor: 'var(--carbon-bg-secondary)',
-          borderColor: 'var(--carbon-border-subtle)',
+          backgroundColor: '#161616',
+          borderColor: '#262626',
         }}
       >
-        <div className="hub-view-header-title">
-          <Sparkles width={24} height={24} style={{ color: 'var(--carbon-interactive)' }} />
-          <h1 className="text-2xl" style={{ color: 'var(--carbon-text-primary)' }}>
-            AI-powered design system assistant
-          </h1>
-        </div>
-        <p className="text-sm" style={{ color: 'var(--carbon-text-secondary)' }}>
-          Ask questions about Carbon components, patterns, and guidelines
-        </p>
+        <h1>AI-powered design system assistant</h1>
+        <p>Ask questions about Carbon components, patterns, and guidelines</p>
       </header>
 
       {!hasMessages && chatInputBlock}
@@ -319,25 +486,16 @@ export function ChatInterface() {
       >
         {chatHistory.length === 0 ? (
           <div className="chat-empty">
+            <p className="chat-empty-label">Suggested questions</p>
             <div className="chat-empty-grid">
               {guidedQuestions.map((question, index) => (
                 <button
                   key={index}
                   onClick={() => handleQuestionClick(question)}
                   className="chat-empty-card"
-                  style={{
-                    backgroundColor: 'var(--carbon-layer-01)',
-                    borderColor: 'var(--carbon-border-subtle)',
-                    color: 'var(--carbon-text-primary)',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--carbon-bg-hover)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--carbon-layer-01)';
-                  }}
                 >
-                  {question}
+                  <span>{question}</span>
+                  <ArrowRight size={16} className="chat-empty-card-arrow" />
                 </button>
               ))}
             </div>
@@ -345,20 +503,20 @@ export function ChatInterface() {
         ) : (
           <div className="chat-thread">
             {(() => {
-              let lastUserIndex = -1;
+              let lastAssistantIndex = -1;
               for (let i = chatHistory.length - 1; i >= 0; i--) {
-                if (chatHistory[i].role === 'user') {
-                  lastUserIndex = i;
+                if (chatHistory[i].role === 'assistant') {
+                  lastAssistantIndex = i;
                   break;
                 }
               }
               return chatHistory.map((message, index) => {
-                const isLastUserMessage = message.role === 'user' && index === lastUserIndex;
+                const isLastAssistantMessage = message.role === 'assistant' && index === lastAssistantIndex;
                 return (
               <div
                 key={message.id}
                 className={`chat-thread-item ${message.role === 'user' ? 'chat-thread-item-user' : ''}`}
-                ref={isLastUserMessage ? lastQuestionRef : undefined}
+                ref={isLastAssistantMessage ? lastAssistantRef : undefined}
               >
                 <div
                   className={`chat-bubble ${message.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-assistant'}`}
@@ -426,6 +584,30 @@ export function ChatInterface() {
                 </div>
 
                 {message.role === 'assistant' && message.componentPreview && renderComponentPreview(message.componentPreview)}
+
+                {message.role === 'assistant' && message.officeHours && renderOfficeHours(message.officeHours)}
+
+                {message.role === 'assistant' && message.suggestedQuestions && message.suggestedQuestions.length > 0 && (
+                  <div className="chat-suggestions">
+                    {message.suggestedQuestions.map((q, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        className="chat-suggestion-btn"
+                        onClick={() => {
+                          if (q === 'Book office hours with a guardian') {
+                            handleBookOfficeHours();
+                          } else {
+                            handleQuestionClick(q);
+                          }
+                        }}
+                      >
+                        <span>{q}</span>
+                        <ArrowRight size={16} className="chat-suggestion-arrow" />
+                      </button>
+                    ))}
+                  </div>
+                )}
 
                 {message.role === 'assistant' && message.sources && message.sources.length > 0 && (
                   <div className="chat-sources">
@@ -511,10 +693,10 @@ export function ChatInterface() {
                   </div>
                 )}
 
-                {message.role === 'assistant' && (
+                {message.role === 'assistant' && !message.officeHours && (
                   <div className="chat-actions">
                     <button
-                      onClick={() => alert('Office hours booking would open here')}
+                      onClick={handleBookOfficeHours}
                       className="chat-action-button"
                       style={{
                         backgroundColor: 'transparent',
@@ -526,10 +708,10 @@ export function ChatInterface() {
                       <Calendar width={16} height={16} />
                       <span>Book office hours</span>
                     </button>
-                    {!feedbackGivenForMessageIds.has(message.id) && (
+                    {!feedbackGivenForMessageIds.has(message.id) ? (
                       <div className="chat-actions-row">
                         <button
-                          onClick={() => handleFeedback(message.id)}
+                          onClick={() => handleFeedback(message.id, 'helpful')}
                           className="chat-action-button chat-action-button-small"
                           style={{
                             backgroundColor: 'transparent',
@@ -543,7 +725,7 @@ export function ChatInterface() {
                         </button>
                         <button
                           onClick={() => {
-                            handleFeedback(message.id);
+                            handleFeedback(message.id, 'unhelpful');
                             handleUnhelpful();
                           }}
                           className="chat-action-button chat-action-button-small"
@@ -558,6 +740,20 @@ export function ChatInterface() {
                           <span>Unhelpful?</span>
                         </button>
                       </div>
+                    ) : (
+                      <span className="chat-feedback-confirmation">
+                        {feedbackGivenForMessageIds.get(message.id) === 'helpful' ? (
+                          <>
+                            <CheckCircle width={14} height={14} style={{ color: 'var(--carbon-support-success)' }} />
+                            Thanks for the feedback!
+                          </>
+                        ) : (
+                          <>
+                            <ThumbsDown width={14} height={14} />
+                            Feedback recorded
+                          </>
+                        )}
+                      </span>
                     )}
                   </div>
                 )}

@@ -13,8 +13,8 @@ import {
   FileCode,
   LogOut,
 } from '@/components/icons';
-import { Security, Code, ColorPalette } from '@carbon/icons-react';
-import { CarbonLogo } from '@/components/Logo';
+import { Security, Code, ColorPalette, AiAgentInvocation } from '@carbon/icons-react';
+import { CarbonLogo, CortexLogo } from '@/components/Logo';
 import { useRole } from '@/contexts/RoleContext';
 import { useRouter } from 'next/navigation';
 import { ChatInterface } from '@/components/ChatInterface';
@@ -22,6 +22,7 @@ import { UIAuditUpload } from '@/components/UIAuditUpload';
 import { GuardianDashboard } from '@/components/GuardianDashboard';
 import { ComponentHealth } from '@/components/ComponentHealth';
 import { TrendInsights } from '@/components/TrendInsights';
+import { Documentation } from '@/components/Documentation';
 
 type StandardView = 'chat' | 'audit' | 'docs';
 type GuardianView = 'dashboard' | 'health' | 'insights';
@@ -108,14 +109,8 @@ export function MainHub() {
 
   return (
     <div className="hub-root" style={{ backgroundColor: 'var(--carbon-bg-primary)' }}>
-      <aside
-        className="hub-sidebar"
-        style={{
-          backgroundColor: 'var(--carbon-bg-secondary)',
-          borderColor: 'var(--carbon-border-subtle)',
-        }}
-      >
-        <div className="hub-sidebar-header" style={{ borderColor: 'var(--carbon-border-subtle)' }}>
+      <aside className="hub-sidebar">
+        <div className="hub-sidebar-header" style={{ borderBottom: '1px solid #262626' }}>
           <button
             type="button"
             className="hub-sidebar-title-row"
@@ -134,15 +129,15 @@ export function MainHub() {
             aria-label="Back to role selection"
           >
             <CarbonLogo size={24} color="var(--carbon-interactive)" />
-            <span className="hub-sidebar-title" style={{ color: 'var(--carbon-text-primary)' }}>
+            <span className="hub-sidebar-title" style={{ color: '#f4f4f4' }}>
               Carbon AI Hub
             </span>
           </button>
           <div
             className="hub-sidebar-role"
             style={{
-              backgroundColor: 'var(--carbon-bg-primary)',
-              borderColor: 'var(--carbon-border-subtle)',
+              backgroundColor: '#262626',
+              borderColor: '#393939',
               borderRadius: 'var(--carbon-radius)',
               position: 'relative',
               padding: 0,
@@ -165,7 +160,7 @@ export function MainHub() {
               aria-label="Toggle role menu"
             >
               {renderRoleIcon()}
-              <span className="hub-sidebar-role-label" style={{ color: 'var(--carbon-text-secondary)' }}>
+              <span className="hub-sidebar-role-label" style={{ color: '#c6c6c6' }}>
                 {getRoleLabel()}
               </span>
               <span
@@ -174,7 +169,7 @@ export function MainHub() {
                   marginLeft: 'auto',
                   backgroundColor: 'transparent',
                   border: 'none',
-                  color: 'var(--carbon-text-secondary)',
+                  color: '#c6c6c6',
                   borderRadius: 'var(--carbon-radius)',
                   width: '1.5rem',
                   height: '1.5rem',
@@ -202,10 +197,10 @@ export function MainHub() {
                   flexDirection: 'column',
                   gap: '0.25rem',
                   padding: '0.5rem',
-                  backgroundColor: 'var(--carbon-bg-primary)',
-                  border: '1px solid var(--carbon-border-subtle)',
+                  backgroundColor: '#262626',
+                  border: '1px solid #393939',
                   borderRadius: 'var(--carbon-radius)',
-                  boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.25)',
                 }}
               >
                 <button
@@ -216,7 +211,7 @@ export function MainHub() {
                     border: 'none',
                     textAlign: 'left',
                     padding: '0.4rem 0.5rem',
-                    color: 'var(--carbon-text-primary)',
+                    color: '#f4f4f4',
                   }}
                 >
                   Guardian
@@ -229,7 +224,7 @@ export function MainHub() {
                     border: 'none',
                     textAlign: 'left',
                     padding: '0.4rem 0.5rem',
-                    color: 'var(--carbon-text-primary)',
+                    color: '#f4f4f4',
                   }}
                 >
                   Developer
@@ -242,12 +237,12 @@ export function MainHub() {
                     border: 'none',
                     textAlign: 'left',
                     padding: '0.4rem 0.5rem',
-                    color: 'var(--carbon-text-primary)',
+                    color: '#f4f4f4',
                   }}
                 >
                   Designer
                 </button>
-                <div style={{ height: 1, backgroundColor: 'var(--carbon-border-subtle)', margin: '0.25rem 0' }} />
+                <div style={{ height: 1, backgroundColor: '#393939', margin: '0.25rem 0' }} />
                 <button
                   className="hub-sidebar-role-menu-item"
                   onClick={handleLogout}
@@ -256,7 +251,7 @@ export function MainHub() {
                     border: 'none',
                     textAlign: 'left',
                     padding: '0.4rem 0.5rem',
-                    color: 'var(--carbon-text-secondary)',
+                    color: '#c6c6c6',
                   }}
                 >
                   Sign out
@@ -271,81 +266,40 @@ export function MainHub() {
             <div className="hub-sidebar-nav-group">
               <button
                 onClick={() => setGuardianView('dashboard')}
-                className="hub-nav-button"
-                style={{
-                  backgroundColor: guardianView === 'dashboard' ? 'var(--carbon-bg-hover)' : 'transparent',
-                  borderColor: guardianView === 'dashboard' ? 'var(--carbon-border-subtle)' : 'transparent',
-                  color: 'var(--carbon-text-primary)',
-                  borderRadius: 'var(--carbon-radius)',
-                }}
+                className={`hub-nav-button${guardianView === 'dashboard' ? ' hub-nav-active' : ''}`}
               >
                 <BarChart3 width={20} height={20} />
                 <span>Dashboard</span>
               </button>
               <button
                 onClick={() => setGuardianView('health')}
-                className="hub-nav-button"
-                style={{
-                  backgroundColor: guardianView === 'health' ? 'var(--carbon-bg-hover)' : 'transparent',
-                  borderColor: guardianView === 'health' ? 'var(--carbon-border-subtle)' : 'transparent',
-                  color: 'var(--carbon-text-primary)',
-                  borderRadius: 'var(--carbon-radius)',
-                }}
+                className={`hub-nav-button${guardianView === 'health' ? ' hub-nav-active' : ''}`}
               >
                 <Activity width={20} height={20} />
                 <span>Component Health</span>
               </button>
               <button
                 onClick={() => setGuardianView('insights')}
-                className="hub-nav-button"
-                style={{
-                  backgroundColor: guardianView === 'insights' ? 'var(--carbon-bg-hover)' : 'transparent',
-                  borderColor: guardianView === 'insights' ? 'var(--carbon-border-subtle)' : 'transparent',
-                  color: 'var(--carbon-text-primary)',
-                  borderRadius: 'var(--carbon-radius)',
-                }}
+                className={`hub-nav-button${guardianView === 'insights' ? ' hub-nav-active' : ''}`}
               >
                 <TrendingUp width={20} height={20} />
                 <span>Insights</span>
               </button>
             </div>
 
-            <div
-              className="hub-sidebar-links"
-              style={{ borderColor: 'var(--carbon-border-subtle)' }}
-            >
-              <div className="hub-sidebar-links-label" style={{ color: 'var(--carbon-text-placeholder)' }}>
-                Quick links
-              </div>
-              <a
-                href="https://github.com/carbon-design-system/carbon"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hub-sidebar-link"
-                style={{ color: 'var(--carbon-text-secondary)' }}
-              >
+            <div className="hub-sidebar-links">
+              <div className="hub-sidebar-links-label">Quick links</div>
+              <a href="https://github.com/carbon-design-system/carbon" target="_blank" rel="noopener noreferrer" className="hub-sidebar-link">
                 <Github width={16} height={16} />
-                <span className="text-sm">GitHub</span>
+                <span>GitHub</span>
               </a>
-              <a
-                href="https://www.figma.com/@carbon"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hub-sidebar-link"
-                style={{ color: 'var(--carbon-text-secondary)' }}
-              >
+              <a href="https://www.figma.com/@carbon" target="_blank" rel="noopener noreferrer" className="hub-sidebar-link">
                 <Figma width={16} height={16} />
-                <span className="text-sm">Figma</span>
+                <span>Figma</span>
               </a>
-              <a
-                href="https://carbondesignsystem.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hub-sidebar-link"
-                style={{ color: 'var(--carbon-text-secondary)' }}
-              >
+              <a href="https://carbondesignsystem.com/" target="_blank" rel="noopener noreferrer" className="hub-sidebar-link">
                 <FileCode width={16} height={16} />
-                <span className="text-sm">Storybook</span>
+                <span>Storybook</span>
               </a>
             </div>
           </nav>
@@ -356,97 +310,56 @@ export function MainHub() {
             <div className="hub-sidebar-nav-group">
               <button
                 onClick={() => setStandardView('chat')}
-                className="hub-nav-button"
-                style={{
-                  backgroundColor: standardView === 'chat' ? 'var(--carbon-bg-hover)' : 'transparent',
-                  borderColor: standardView === 'chat' ? 'var(--carbon-border-subtle)' : 'transparent',
-                  color: 'var(--carbon-text-primary)',
-                  borderRadius: 'var(--carbon-radius)',
-                }}
+                className={`hub-nav-button${standardView === 'chat' ? ' hub-nav-active' : ''}`}
               >
-                <MessageSquare width={20} height={20} />
+                <AiAgentInvocation size={20} />
                 <span>AI Chat</span>
               </button>
               <button
                 onClick={() => setStandardView('audit')}
-                className="hub-nav-button"
-                style={{
-                  backgroundColor: standardView === 'audit' ? 'var(--carbon-bg-hover)' : 'transparent',
-                  borderColor: standardView === 'audit' ? 'var(--carbon-border-subtle)' : 'transparent',
-                  color: 'var(--carbon-text-primary)',
-                  borderRadius: 'var(--carbon-radius)',
-                }}
+                className={`hub-nav-button${standardView === 'audit' ? ' hub-nav-active' : ''}`}
               >
                 <Upload width={20} height={20} />
                 <span>UI Audit</span>
               </button>
               <button
                 onClick={() => setStandardView('docs')}
-                className="hub-nav-button"
-                style={{
-                  backgroundColor: standardView === 'docs' ? 'var(--carbon-bg-hover)' : 'transparent',
-                  borderColor: standardView === 'docs' ? 'var(--carbon-border-subtle)' : 'transparent',
-                  color: 'var(--carbon-text-primary)',
-                  borderRadius: 'var(--carbon-radius)',
-                }}
+                className={`hub-nav-button${standardView === 'docs' ? ' hub-nav-active' : ''}`}
               >
                 <BookOpen width={20} height={20} />
                 <span>Documentation</span>
               </button>
             </div>
 
-            <div
-              className="hub-sidebar-links"
-              style={{ borderColor: 'var(--carbon-border-subtle)' }}
-            >
-              <div className="hub-sidebar-links-label" style={{ color: 'var(--carbon-text-placeholder)' }}>
-                Quick links
-              </div>
-              <a
-                href="https://github.com/carbon-design-system/carbon"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hub-sidebar-link"
-                style={{ color: 'var(--carbon-text-secondary)' }}
-              >
+            <div className="hub-sidebar-links">
+              <div className="hub-sidebar-links-label">Quick links</div>
+              <a href="https://github.com/carbon-design-system/carbon" target="_blank" rel="noopener noreferrer" className="hub-sidebar-link">
                 <Github width={16} height={16} />
-                <span className="text-sm">GitHub</span>
+                <span>GitHub</span>
               </a>
-              <a
-                href="https://www.figma.com/@carbon"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hub-sidebar-link"
-                style={{ color: 'var(--carbon-text-secondary)' }}
-              >
+              <a href="https://www.figma.com/@carbon" target="_blank" rel="noopener noreferrer" className="hub-sidebar-link">
                 <Figma width={16} height={16} />
-                <span className="text-sm">Figma</span>
+                <span>Figma</span>
               </a>
-              <a
-                href="https://carbondesignsystem.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hub-sidebar-link"
-                style={{ color: 'var(--carbon-text-secondary)' }}
-              >
+              <a href="https://carbondesignsystem.com/" target="_blank" rel="noopener noreferrer" className="hub-sidebar-link">
                 <FileCode width={16} height={16} />
-                <span className="text-sm">Storybook</span>
+                <span>Storybook</span>
               </a>
             </div>
           </nav>
         )}
 
-        <div className="hub-sidebar-footer" style={{ borderColor: 'var(--carbon-border-subtle)' }}>
+        <div className="hub-sidebar-footer">
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, paddingBottom: '0.75rem' }}>
+            <span style={{ fontSize: 10, lineHeight: 1, color: '#6f6f6f', fontFamily: 'var(--carbon-font-family, inherit)' }}>
+              Powered by
+            </span>
+            <CortexLogo height={20} color="#525252" />
+          </div>
           <button
             type="button"
             onClick={handleLogout}
             className="hub-nav-button"
-            style={{
-              backgroundColor: 'transparent',
-              borderColor: 'var(--carbon-border-subtle)',
-              color: 'var(--carbon-text-primary)',
-              borderRadius: 'var(--carbon-radius)',
-            }}
           >
             <LogOut width={20} height={20} />
             <span>Sign out</span>
@@ -467,19 +380,7 @@ export function MainHub() {
           <>
             {standardView === 'chat' && <ChatInterface />}
             {standardView === 'audit' && <UIAuditUpload />}
-            {standardView === 'docs' && (
-              <div className="hub-placeholder">
-                <div className="hub-placeholder-inner">
-                  <BookOpen width={64} height={64} className="mx-auto mb-4" style={{ color: 'var(--carbon-text-placeholder)' }} />
-                  <h2 className="text-2xl mb-2" style={{ color: 'var(--carbon-text-primary)' }}>
-                    Documentation
-                  </h2>
-                  <p style={{ color: 'var(--carbon-text-secondary)' }}>
-                    Documentation view coming soon
-                  </p>
-                </div>
-              </div>
-            )}
+            {standardView === 'docs' && <Documentation />}
           </>
         )}
       </main>

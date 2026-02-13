@@ -1,6 +1,6 @@
 'use client';
 
-import { Security, Code, ColorPalette } from '@carbon/icons-react';
+import { Security, Code, ColorPalette, ArrowRight } from '@carbon/icons-react';
 import { CarbonLogo, CortexLogo } from '@/components/Logo';
 import { useRole, type UserRole } from '@/contexts/RoleContext';
 import { useRouter } from 'next/navigation';
@@ -17,21 +17,24 @@ const roles: RoleOption[] = [
   {
     id: 'guardian',
     title: 'Design System Guardian',
-    description: 'Monitor designer uncertainty, detect patterns, and guide system evolution',
+    description:
+      'Monitor designer uncertainty, detect patterns, and guide system evolution',
     icon: Security,
     focus: 'System governance',
   },
   {
     id: 'developer',
     title: 'Developer',
-    description: 'Access code snippets, prop tables, and React implementation details',
+    description:
+      'Access code snippets, prop tables, and React implementation details',
     icon: Code,
     focus: 'Technical implementation',
   },
   {
     id: 'designer',
     title: 'Designer',
-    description: 'Explore spacing tokens, color values, and Figma-ready specs',
+    description:
+      'Explore spacing tokens, color values, and Figma-ready specs',
     icon: ColorPalette,
     focus: 'Visual specifications',
   },
@@ -47,97 +50,80 @@ export function RoleSelector() {
   };
 
   return (
-    <div
-      className="role-selector"
-      style={{
-        backgroundColor: 'var(--carbon-bg-primary)',
-        fontFamily: 'var(--carbon-font-family)',
-      }}
-    >
-      <div className="role-selector-inner">
-        <div className="role-selector-header">
-          <div className="role-selector-title-row">
-            <CarbonLogo size={32} color="var(--carbon-interactive)" />
-            <h1 className="role-selector-title" style={{ color: 'var(--carbon-text-primary)' }}>
-              Carbon Design System
-            </h1>
+    <div className="role-selector">
+      {/* ── Dark hero banner ─────────────────────────────── */}
+      <div className="role-hero">
+        <div className="role-hero-inner">
+          <div className="role-hero-brand">
+            <CarbonLogo size={24} color="#ffffff" />
+            <span className="role-hero-brand-text">Carbon Design System</span>
           </div>
-          <h2 className="role-selector-subtitle" style={{ color: 'var(--carbon-text-primary)' }}>
-            AI Hub
-          </h2>
-          <p className="role-selector-desc" style={{ color: 'var(--carbon-text-secondary)' }}>
-            Select your role to personalize your experience
+
+          <h1 className="role-hero-title">AI Hub</h1>
+
+          <p className="role-hero-subtitle">
+            AI-powered documentation assistant for IBM Carbon Design System.
+            Get contextual answers drawn from live documentation, Figma assets,
+            and the <code>@carbon/react</code> source.
           </p>
         </div>
 
-        <div className="role-selector-grid">
-          {roles.map((role) => {
-            const Icon = role.icon;
-            return (
-              <button
-                key={role.id}
-                onClick={() => handleRoleSelect(role.id)}
-                className="role-card"
-                style={{
-                  backgroundColor: 'var(--carbon-layer-01)',
-                  borderColor: 'var(--carbon-border-subtle)',
-                  borderRadius: 'var(--carbon-radius)',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--carbon-bg-hover)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--carbon-layer-01)';
-                }}
-              >
-                <div className="role-card-content">
-                  <div
-                    className="role-card-icon"
-                    style={{
-                      backgroundColor: 'var(--carbon-interactive)',
-                      borderColor: 'var(--carbon-interactive)',
-                      borderRadius: 'var(--carbon-radius)',
-                    }}
-                  >
-                    <Icon size={24} fill="var(--carbon-text-on-color)" />
-                  </div>
-                  <div>
-                    <h3 className="role-card-title" style={{ color: 'var(--carbon-text-primary)' }}>
-                      {role.title}
-                    </h3>
-                    <p className="role-card-desc" style={{ color: 'var(--carbon-text-secondary)' }}>
-                      {role.description}
-                    </p>
-                    <span
-                      className="role-card-tag"
-                      style={{
-                        color: 'var(--carbon-text-secondary)',
-                        borderColor: 'var(--carbon-border-subtle)',
-                        borderRadius: 'var(--carbon-radius)',
-                      }}
-                    >
-                      {role.focus}
-                    </span>
-                  </div>
-                </div>
-              </button>
-            );
-          })}
+        {/* Decorative grid lines — subtle IBM motif */}
+        <div className="role-hero-grid-lines" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+          <span />
         </div>
-
       </div>
 
-      <div className="role-selector-footer" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-        <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-          <span style={{ fontSize: 12, lineHeight: 1, color: 'var(--logo-powered-by-color, #6f6f6f)', fontFamily: 'var(--carbon-font-family, inherit)' }}>
-            Powered by
-          </span>
+      {/* ── Role cards section ───────────────────────────── */}
+      <div className="role-content">
+        <div className="role-content-inner">
+          <p className="role-section-label">Select your role to get started</p>
+
+          <div className="role-selector-grid">
+            {roles.map((role) => {
+              const Icon = role.icon;
+              return (
+                <button
+                  key={role.id}
+                  className="role-card"
+                  onClick={() => handleRoleSelect(role.id)}
+                >
+                  <div className="role-card-accent" />
+
+                  <div className="role-card-body">
+                    <div className="role-card-icon-wrap">
+                      <Icon size={24} fill="var(--carbon-interactive)" />
+                    </div>
+
+                    <h3 className="role-card-title">{role.title}</h3>
+
+                    <p className="role-card-desc">{role.description}</p>
+
+                    <div className="role-card-footer">
+                      <span className="role-card-tag">{role.focus}</span>
+                      <ArrowRight size={20} className="role-card-arrow" />
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Footer ───────────────────────────────────────── */}
+      <footer className="role-selector-footer">
+        <div className="role-footer-powered">
+          <span className="role-footer-powered-label">Powered by</span>
           <CortexLogo height={18} />
         </div>
-        <p className="role-selector-footer-text" style={{ color: 'var(--carbon-text-placeholder)' }}>
+        <p className="role-selector-footer-text">
           Indexes carbondesignsystem.com, Figma APIs, and @carbon/react
         </p>
-      </div>
+      </footer>
     </div>
   );
 }

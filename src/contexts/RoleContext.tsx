@@ -10,6 +10,13 @@ export type UserRole =
   | 'project-owner'
   | null;
 
+export interface OfficeHoursGuardian {
+  name: string;
+  specialty: string;
+  nextSlot: string;
+  avatar: string;
+}
+
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
@@ -23,6 +30,15 @@ export interface ChatMessage {
   trustBadge?: 'official' | 'best-practice';
   /** When true, show guardian "Record an answer" CTA (optional video escalation) */
   suggestVideoAnswer?: boolean;
+  /** Office hours booking flow data */
+  officeHours?: {
+    step: 'select-role' | 'select-guardian' | 'confirmed';
+    role?: 'designer' | 'developer';
+    guardians?: OfficeHoursGuardian[];
+    booking?: { guardian: string; time: string; specialty: string };
+  };
+  /** Clickable suggested questions rendered after the message */
+  suggestedQuestions?: string[];
   timestamp: Date;
 }
 
