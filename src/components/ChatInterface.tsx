@@ -1,13 +1,44 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Send, ThumbsUp, ThumbsDown, Calendar, Github, Figma, FileCode, Video, CheckCircle } from '@/components/icons';
-import { ArrowRight, ColorPalette, Code } from '@carbon/icons-react';
+import { ArrowRight, ColorPalette, Code, Copy } from '@carbon/icons-react';
 import { useRole, type OfficeHoursGuardian } from '@/contexts/RoleContext';
 import { generateAIResponse } from '@/utils/aiResponses';
 import { GuardianRecordModal } from '@/components/GuardianRecordModal';
+
+/* ── Helpers ────────────────────────────────────────────── */
+
+function formatRelativeTime(date: Date): string {
+  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (seconds < 30) return 'just now';
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+}
+
+/** Map a guardian specialty to contextual follow-up questions */
+function getContextualQuestions(specialty: string): string[] {
+  const lower = specialty.toLowerCase();
+  if (lower.includes('layout') || lower.includes('pattern'))
+    return ['What are the grid breakpoints?', 'How do I use the Shell layout?', 'Show me card component patterns', 'What spacing tokens should I use for layouts?'];
+  if (lower.includes('color') || lower.includes('typography') || lower.includes('theming') || lower.includes('token'))
+    return ['What are the color token values?', 'Show me the type scale', 'How do I create a custom theme?', 'What font weights are available?'];
+  if (lower.includes('accessibility') || lower.includes('inclusive'))
+    return ['How do I make modals accessible?', 'What are the keyboard navigation patterns?', 'Show me ARIA label guidelines', 'How do I test for accessibility?'];
+  if (lower.includes('react') || lower.includes('hook') || lower.includes('component'))
+    return ['Show me the Button component props', 'How do I use the DataTable component?', 'What hooks are available?', 'How do I handle component events?'];
+  if (lower.includes('scss') || lower.includes('css'))
+    return ['What\'s the spacing token for medium gaps?', 'How do I override theme variables?', 'Show me the SCSS mixin list', 'How do I use motion tokens?'];
+  if (lower.includes('testing') || lower.includes('api'))
+    return ['How do I test Carbon components?', 'What testing utilities are available?', 'Show me accessible component patterns', 'How do I mock Carbon components?'];
+  return ['What are the specs for a DataTable?', 'Show me the Button component props', 'What\'s the spacing token for medium gaps?', 'How do I implement accessible modals?'];
+}
 
 const guidedQuestions = [
   'What are the specs for a DataTable?',
@@ -35,9 +66,19 @@ export function ChatInterface() {
   const [suggestionIndex, setSuggestionIndex] = useState(0);
   const [feedbackGivenForMessageIds, setFeedbackGivenForMessageIds] = useState<Map<string, 'helpful' | 'unhelpful'>>(new Map());
   const [showRecordModal, setShowRecordModal] = useState(false);
+  const [typingContext, setTypingContext] = useState<string>('');
+  const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const lastAssistantRef = useRef<HTMLDivElement>(null);
+  const lastQuestionRef = useRef<HTMLDivElement>(null);
+  const firstCardRef = useRef<HTMLButtonElement>(null);
+
+  const handleCopyCode = useCallback((code: string, id: string) => {
+    navigator.clipboard.writeText(code).then(() => {
+      setCopiedCodeId(id);
+      setTimeout(() => setCopiedCodeId(null), 2000);
+    });
+  }, []);
 
   const handleFeedback = (messageId: string, type: 'helpful' | 'unhelpful') => {
     setFeedbackGivenForMessageIds((prev) => new Map(prev).set(messageId, type));
@@ -69,17 +110,35 @@ export function ChatInterface() {
     return () => clearTimeout(t);
   }, [hasMessages, isTyping]);
 
-  /* When a new assistant reply appears, scroll it to the top of the viewport so the user sees the beginning */
+  /* When an assistant reply appears, scroll so the user's question is at the top of the viewport */
   useEffect(() => {
     if (!hasMessages || isTyping) return;
     const last = chatHistory[chatHistory.length - 1];
     if (last?.role === 'assistant') {
       const t = setTimeout(() => {
-        lastAssistantRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        lastQuestionRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
       }, 100);
       return () => clearTimeout(t);
     }
   }, [chatHistory, isTyping, hasMessages]);
+
+  /* Focus the first interactive card when a new office hours step appears */
+  useEffect(() => {
+    if (!hasMessages || isTyping) return;
+    const last = chatHistory[chatHistory.length - 1];
+    if (last?.role === 'assistant' && last.officeHours && last.officeHours.step !== 'confirmed') {
+      const t = setTimeout(() => firstCardRef.current?.focus(), 200);
+      return () => clearTimeout(t);
+    }
+  }, [chatHistory, isTyping, hasMessages]);
+
+  /* Refresh relative timestamps every 30s */
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    if (!hasMessages) return;
+    const interval = setInterval(() => setTick((t) => t + 1), 30000);
+    return () => clearInterval(interval);
+  }, [hasMessages]);
 
   const handleSend = () => {
     if (!input.trim() || !userRole) return;
@@ -93,10 +152,12 @@ export function ChatInterface() {
     });
 
     setIsTyping(true);
+    setTypingContext('Looking up component specs...');
     setTimeout(() => {
       const aiResponse = generateAIResponse(userMessage, userRole);
       addMessage(aiResponse);
       setIsTyping(false);
+      setTypingContext('');
     }, 1500);
   };
 
@@ -109,10 +170,12 @@ export function ChatInterface() {
     });
 
     setIsTyping(true);
+    setTypingContext('Searching Carbon guidelines...');
     setTimeout(() => {
       const aiResponse = generateAIResponse(question, userRole);
       addMessage(aiResponse);
       setIsTyping(false);
+      setTypingContext('');
     }, 1500);
   };
 
@@ -159,6 +222,7 @@ export function ChatInterface() {
     });
 
     setIsTyping(true);
+    setTypingContext('Finding available guardians...');
     setTimeout(() => {
       const guardians = role === 'designer' ? designerGuardians : developerGuardians;
       addMessage({
@@ -167,6 +231,7 @@ export function ChatInterface() {
         officeHours: { step: 'select-guardian', role, guardians },
       });
       setIsTyping(false);
+      setTypingContext('');
     }, 800);
   };
 
@@ -177,6 +242,7 @@ export function ChatInterface() {
     });
 
     setIsTyping(true);
+    setTypingContext('Booking your session...');
     setTimeout(() => {
       addMessage({
         role: 'assistant',
@@ -196,23 +262,54 @@ export function ChatInterface() {
         addMessage({
           role: 'assistant',
           content: 'Is there anything else I can help you with?',
-          suggestedQuestions: [
-            'What are the specs for a DataTable?',
-            'Show me the Button component props',
-            'What\'s the spacing token for medium gaps?',
-            'How do I implement accessible modals?',
-          ],
+          suggestedQuestions: getContextualQuestions(guardian.specialty),
         });
         setIsTyping(false);
+        setTypingContext('');
       }, 600);
     }, 1000);
   };
 
-  const renderOfficeHours = (officeHours: NonNullable<(typeof chatHistory)[number]['officeHours']>) => {
+  const handleCancelBooking = () => {
+    addMessage({
+      role: 'user',
+      content: 'Cancel the booking',
+    });
+
+    setIsTyping(true);
+    setTypingContext('Cancelling your booking...');
+    setTimeout(() => {
+      addMessage({
+        role: 'assistant',
+        content: 'Your booking has been cancelled. Would you like to reschedule or is there anything else I can help with?',
+        suggestedQuestions: [
+          'Book office hours with a guardian',
+          'What are the specs for a DataTable?',
+          'Show me the Button component props',
+          'How do I implement accessible modals?',
+        ],
+      });
+      setIsTyping(false);
+      setTypingContext('');
+    }, 800);
+  };
+
+  const renderOfficeHours = (officeHours: NonNullable<(typeof chatHistory)[number]['officeHours']>, messageIndex: number) => {
+    /* If there are messages after this one, the user already interacted — disable cards */
+    const isInteracted = messageIndex < chatHistory.length - 1;
+
     if (officeHours.step === 'select-role') {
       return (
-        <div className="chat-oh-grid">
-          <button type="button" className="chat-oh-card" onClick={() => handleSelectGuardianRole('designer')}>
+        <div className={`chat-oh-grid${isInteracted ? ' chat-oh-disabled' : ''}`}>
+          <button
+            ref={!isInteracted ? firstCardRef : undefined}
+            type="button"
+            className="chat-oh-card"
+            onClick={() => !isInteracted && handleSelectGuardianRole('designer')}
+            disabled={isInteracted}
+            aria-disabled={isInteracted}
+            tabIndex={isInteracted ? -1 : 0}
+          >
             <div className="chat-oh-card-accent" />
             <div className="chat-oh-card-body">
               <div className="chat-oh-card-icon">
@@ -225,7 +322,14 @@ export function ChatInterface() {
               <ArrowRight size={16} className="chat-oh-card-arrow" />
             </div>
           </button>
-          <button type="button" className="chat-oh-card" onClick={() => handleSelectGuardianRole('developer')}>
+          <button
+            type="button"
+            className="chat-oh-card"
+            onClick={() => !isInteracted && handleSelectGuardianRole('developer')}
+            disabled={isInteracted}
+            aria-disabled={isInteracted}
+            tabIndex={isInteracted ? -1 : 0}
+          >
             <div className="chat-oh-card-accent" />
             <div className="chat-oh-card-body">
               <div className="chat-oh-card-icon">
@@ -244,9 +348,18 @@ export function ChatInterface() {
 
     if (officeHours.step === 'select-guardian' && officeHours.guardians) {
       return (
-        <div className="chat-oh-guardian-grid">
-          {officeHours.guardians.map((g) => (
-            <button key={g.name} type="button" className="chat-oh-guardian-card" onClick={() => handleBookGuardian(g)}>
+        <div className={`chat-oh-guardian-grid${isInteracted ? ' chat-oh-disabled' : ''}`}>
+          {officeHours.guardians.map((g, i) => (
+            <button
+              key={g.name}
+              ref={i === 0 && !isInteracted ? firstCardRef : undefined}
+              type="button"
+              className="chat-oh-guardian-card"
+              onClick={() => !isInteracted && handleBookGuardian(g)}
+              disabled={isInteracted}
+              aria-disabled={isInteracted}
+              tabIndex={isInteracted ? -1 : 0}
+            >
               <div className="chat-oh-avatar">{g.avatar}</div>
               <div className="chat-oh-guardian-info">
                 <span className="chat-oh-guardian-name">{g.name}</span>
@@ -284,10 +397,15 @@ export function ChatInterface() {
               <span className="chat-oh-confirmed-value">{officeHours.booking.time}</span>
             </div>
           </div>
-          <p className="chat-oh-confirmed-note">
-            <Calendar width={14} height={14} />
-            Added to your calendar
-          </p>
+          <div className="chat-oh-confirmed-footer">
+            <p className="chat-oh-confirmed-note">
+              <Calendar width={14} height={14} />
+              Added to your calendar
+            </p>
+            <button type="button" className="chat-oh-cancel-btn" onClick={handleCancelBooking}>
+              Cancel booking
+            </button>
+          </div>
         </div>
       );
     }
@@ -503,37 +621,24 @@ export function ChatInterface() {
         ) : (
           <div className="chat-thread">
             {(() => {
-              let lastAssistantIndex = -1;
+              let lastUserIndex = -1;
               for (let i = chatHistory.length - 1; i >= 0; i--) {
-                if (chatHistory[i].role === 'assistant') {
-                  lastAssistantIndex = i;
-                  break;
-                }
+                if (chatHistory[i].role === 'user') { lastUserIndex = i; break; }
               }
               return chatHistory.map((message, index) => {
-                const isLastAssistantMessage = message.role === 'assistant' && index === lastAssistantIndex;
+                const isLastUser = message.role === 'user' && index === lastUserIndex;
                 return (
               <div
                 key={message.id}
-                className={`chat-thread-item ${message.role === 'user' ? 'chat-thread-item-user' : ''}`}
-                ref={isLastAssistantMessage ? lastAssistantRef : undefined}
+                className={`chat-thread-item chat-thread-item-enter ${message.role === 'user' ? 'chat-thread-item-user' : ''}`}
+                ref={isLastUser ? lastQuestionRef : undefined}
               >
                 <div
                   className={`chat-bubble ${message.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-assistant'}`}
-                  style={{
-                    backgroundColor:
-                      message.role === 'user' ? 'transparent' : 'var(--carbon-layer-01)',
-                    borderColor:
-                      message.role === 'user' ? 'transparent' : 'var(--carbon-border-subtle)',
-                    borderWidth: message.role === 'user' ? 0 : undefined,
-                    color:
-                      message.role === 'user' ? 'var(--carbon-text-primary)' : 'var(--carbon-text-primary)',
-                    borderRadius: 'var(--carbon-radius)',
-                    ...(message.role === 'user' && {
-                      fontWeight: 'bold',
-                      textAlign: 'left',
-                    }),
-                  }}
+                  style={message.role === 'assistant' ? {
+                    backgroundColor: 'var(--carbon-layer-01)',
+                    borderColor: 'var(--carbon-border-subtle)',
+                  } : undefined}
                 >
                   {message.role === 'assistant' && message.trustBadge && (
                     <div className="chat-bubble-badge">
@@ -559,33 +664,48 @@ export function ChatInterface() {
                       </span>
                     </div>
                   )}
-                  {message.role === 'user' && (
-                    <div
-                      className="chat-user-question-label"
-                      style={{
-                        fontSize: '1rem',
-                        fontWeight: 400,
-                        color: 'var(--carbon-text-secondary)',
-                        marginBottom: '0.25rem',
-                      }}
-                    >
-                      You are asking:
-                    </div>
-                  )}
                   {message.role === 'assistant' ? (
                     <div className="chat-markdown">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          code({ className, children, ...props }) {
+                            const isBlock = className?.startsWith('language-');
+                            if (!isBlock) return <code className={className} {...props}>{children}</code>;
+                            const codeStr = String(children).replace(/\n$/, '');
+                            const codeId = `${message.id}-${codeStr.slice(0, 20)}`;
+                            return (
+                              <div className="chat-code-block">
+                                <button
+                                  type="button"
+                                  className="chat-code-copy"
+                                  onClick={() => handleCopyCode(codeStr, codeId)}
+                                  aria-label="Copy code"
+                                >
+                                  {copiedCodeId === codeId ? (
+                                    <><CheckCircle width={14} height={14} /> Copied</>
+                                  ) : (
+                                    <><Copy size={14} /> Copy</>
+                                  )}
+                                </button>
+                                <code className={className} {...props}>{children}</code>
+                              </div>
+                            );
+                          },
+                        }}
+                      >
                         {message.content}
                       </ReactMarkdown>
                     </div>
                   ) : (
                     <div className="whitespace-pre-wrap">{message.content}</div>
                   )}
+                  <span className="chat-timestamp">{formatRelativeTime(message.timestamp)}</span>
                 </div>
 
                 {message.role === 'assistant' && message.componentPreview && renderComponentPreview(message.componentPreview)}
 
-                {message.role === 'assistant' && message.officeHours && renderOfficeHours(message.officeHours)}
+                {message.role === 'assistant' && message.officeHours && renderOfficeHours(message.officeHours, index)}
 
                 {message.role === 'assistant' && message.suggestedQuestions && message.suggestedQuestions.length > 0 && (
                   <div className="chat-suggestions">
@@ -763,27 +883,23 @@ export function ChatInterface() {
             })()}
 
             {isTyping && (
-              <div
-                className="chat-bubble chat-bubble-assistant"
-                style={{
-                  backgroundColor: 'var(--carbon-layer-01)',
-                  borderColor: 'var(--carbon-border-subtle)',
-                  borderRadius: 'var(--carbon-radius)',
-                }}
-              >
-                <div className="chat-typing">
-                  <div
-                    className="chat-typing-dot"
-                    style={{ backgroundColor: 'var(--carbon-text-placeholder)', animationDelay: '0ms' }}
-                  />
-                  <div
-                    className="chat-typing-dot"
-                    style={{ backgroundColor: 'var(--carbon-text-placeholder)', animationDelay: '150ms' }}
-                  />
-                  <div
-                    className="chat-typing-dot"
-                    style={{ backgroundColor: 'var(--carbon-text-placeholder)', animationDelay: '300ms' }}
-                  />
+              <div className="chat-thread-item chat-thread-item-enter">
+                <div
+                  className="chat-bubble chat-bubble-assistant"
+                  style={{
+                    backgroundColor: 'var(--carbon-layer-01)',
+                    borderColor: 'var(--carbon-border-subtle)',
+                    borderRadius: 'var(--carbon-radius)',
+                  }}
+                >
+                  {typingContext && (
+                    <span className="chat-typing-context">{typingContext}</span>
+                  )}
+                  <div className="chat-typing">
+                    <div className="chat-typing-dot" style={{ backgroundColor: 'var(--carbon-text-placeholder)', animationDelay: '0ms' }} />
+                    <div className="chat-typing-dot" style={{ backgroundColor: 'var(--carbon-text-placeholder)', animationDelay: '150ms' }} />
+                    <div className="chat-typing-dot" style={{ backgroundColor: 'var(--carbon-text-placeholder)', animationDelay: '300ms' }} />
+                  </div>
                 </div>
               </div>
             )}

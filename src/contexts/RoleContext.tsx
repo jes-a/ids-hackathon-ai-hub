@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export type UserRole =
   | 'developer'
@@ -52,9 +52,28 @@ interface RoleContextType {
 
 const RoleContext = createContext<RoleContextType | undefined>(undefined);
 
+function loadChatHistory(): ChatMessage[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = sessionStorage.getItem('carbon-chat-history');
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as ChatMessage[];
+    return parsed.map((m) => ({ ...m, timestamp: new Date(m.timestamp) }));
+  } catch {
+    return [];
+  }
+}
+
 export function RoleProvider({ children }: { children: React.ReactNode }) {
   const [userRole, setUserRole] = useState<UserRole>(null);
-  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>(loadChatHistory);
+
+  /* Persist chat history to sessionStorage */
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('carbon-chat-history', JSON.stringify(chatHistory));
+    } catch { /* quota exceeded — ignore */ }
+  }, [chatHistory]);
 
   const addMessage = (message: Omit<ChatMessage, 'id' | 'timestamp'>) => {
     const newMessage: ChatMessage = {
@@ -67,6 +86,7 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
 
   const clearHistory = () => {
     setChatHistory([]);
+    try { sessionStorage.removeItem('carbon-chat-history'); } catch { /* ignore */ }
   };
 
   return (
